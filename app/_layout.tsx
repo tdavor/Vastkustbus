@@ -22,6 +22,8 @@ function Routes() {
       <Stack.Protected guard={Boolean(journal.profile)}>
         <Stack.Screen name="mission" />
         <Stack.Screen name="book" />
+        <Stack.Screen name="rewards" />
+        <Stack.Screen name="slideshow" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="memory/[id]" />
       </Stack.Protected>
     </Stack>

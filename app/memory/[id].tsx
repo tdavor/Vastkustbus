@@ -7,19 +7,22 @@ import { captureRef } from 'react-native-view-shot';
 import { dateLabel, MemoryPhoto, placeLabel } from '../../src/memory';
 import { avatars, levelFor, missions } from '../../src/missions';
 import { useJournal } from '../../src/store';
+import { rewardsCopy } from '../../src/rewards';
 import { appName, copy } from '../../src/text';
 import { Animal, Button, colors, Page, styles } from '../../src/ui';
 
 export default function MemoryDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { journal: { language, memories, profile }, xp } = useJournal();
+  const { journal: { language, memories, profile, rewards }, xp, updateRewards } = useJournal();
   const memory = memories.find(item => item.id === id);
   const t = copy[language];
+  const r = rewardsCopy[language];
   const preview = useRef<View>(null);
   const sharing = useRef(false);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [favoriteError, setFavoriteError] = useState(false);
 
   async function share() {
     if (!preview.current || sharing.current || !ready) return;
@@ -62,6 +65,13 @@ export default function MemoryDetail() {
         </View>
         <Button title={t.share} icon="share-social-outline" tone="yellow" disabled={!ready || busy}
           onPress={() => { void share(); }} />
+        {rewards.unlocked.includes(1500) && <Button title={rewards.favorite === memory.id ? r.chosen : r.favorite}
+          icon={rewards.favorite === memory.id ? 'star' : 'star-outline'} tone="quiet" disabled={rewards.favorite === memory.id}
+          onPress={() => {
+            setFavoriteError(false);
+            void updateRewards(previous => ({ ...previous, favorite: memory.id })).catch(() => setFavoriteError(true));
+          }} />}
+        {favoriteError && <Text accessibilityRole="alert" style={styles.error}>{t.saveError}</Text>}
         <Text style={styles.small}>{t.offline}</Text>
         {error && <Text accessibilityRole="alert" style={styles.error}>{t.sharingError}</Text>}
       </> : <Text style={styles.body}>{t.missing}</Text>}

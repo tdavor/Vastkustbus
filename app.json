@@ -2,14 +2,14 @@
   "expo": {
     "name": "Västkustbus",
     "slug": "goteborg-explorer",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "scheme": "goteborgexplorer",
     "platforms": ["android"],
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
     "android": {
       "package": "se.goteborgexplorer.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "allowBackup": false,
       "permissions": ["CAMERA", "ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
       "blockedPermissions": ["android.permission.RECORD_AUDIO", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_MEDIA_IMAGES", "android.permission.READ_MEDIA_VIDEO"]

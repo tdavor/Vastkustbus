@@ -1,5 +1,7 @@
 export const copy = {
   en: {
+    updateTitle: 'Update available', updateMessage: 'Version {version} is available on GitHub.',
+    viewUpdate: 'View updates',
     welcome: 'Ready to explore?', intro: 'Pick an animal and make an explorer profile together.',
     name: 'Child’s name', avatar: 'Choose an animal', begin: 'Let’s explore', language: 'Language',
     level: 'Level', nextLevel: 'XP to the next level', start: 'Start New Mission', book: 'Memory Book',
@@ -21,6 +23,8 @@ export const copy = {
     photoError: 'This photo could not be opened.', photo: 'Mission photo',
   },
   sv: {
+    updateTitle: 'Uppdatering tillgänglig', updateMessage: 'Version {version} finns på GitHub.',
+    viewUpdate: 'Visa uppdateringar',
     welcome: 'Redo att upptäcka?', intro: 'Välj ett djur och skapa en upptäckarprofil tillsammans.',
     name: 'Barnets namn', avatar: 'Välj ett djur', begin: 'Nu ger vi oss ut', language: 'Språk',
     level: 'Nivå', nextLevel: 'XP till nästa nivå', start: 'Starta nytt uppdrag', book: 'Minnesbok',

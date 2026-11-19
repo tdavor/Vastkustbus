@@ -63,6 +63,12 @@ jobs:
           sdkmanager "platforms;android-36" "build-tools;36.0.0" \
             "ndk;27.1.12297006" "cmake;3.22.1"
           npm ci
+          # v1.0.1 has a newer expo-font peer hoisted above the Expo SDK 54 copy.
+          if [[ -d node_modules/expo/node_modules/expo-font ]] &&
+             [[ "$(node -p "require('expo/package.json').version")" == 54.* ]]; then
+            rm -rf node_modules/expo-font
+            mv node_modules/expo/node_modules/expo-font node_modules/expo-font
+          fi
           npm run typecheck
           npx expo prebuild --platform android --no-install
           cd android

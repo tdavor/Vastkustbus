@@ -7,7 +7,7 @@ import { captureRef } from 'react-native-view-shot';
 import { dateLabel, MemoryPhoto, placeLabel } from '../../src/memory';
 import { avatars, levelFor, missions } from '../../src/missions';
 import { useJournal } from '../../src/store';
-import { copy } from '../../src/text';
+import { appName, copy } from '../../src/text';
 import { Animal, Button, colors, Page, styles } from '../../src/ui';
 
 export default function MemoryDetail() {
@@ -29,7 +29,7 @@ export default function MemoryDetail() {
     try {
       if (!await Sharing.isAvailableAsync()) throw new Error('Sharing unavailable');
       const uri = await captureRef(preview, { format: 'png', result: 'tmpfile' });
-      await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: t.share });
+      await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: appName });
     } catch {
       setError(true);
     } finally {
@@ -46,7 +46,10 @@ export default function MemoryDetail() {
       {memory && profile ? <>
         <View ref={preview} collapsable={false} style={[styles.card, { backgroundColor: colors.paleGreen, borderWidth: 6, borderColor: colors.forest }]}>
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
-            <Text style={styles.brand}>{t.postcard}</Text>
+            <View style={{ flexShrink: 1 }}>
+              <Text style={styles.heading}>{appName}</Text>
+              <Text style={styles.small}>{t.postcard}</Text>
+            </View>
             <Ionicons name="compass" size={27} color={colors.forest} />
           </View>
           <MemoryPhoto key={memory.id} memory={memory} language={language} onLoaded={() => setReady(true)} />

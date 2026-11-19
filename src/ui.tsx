@@ -1,11 +1,13 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps, ReactNode } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Avatar } from './missions';
+import type { Rewards } from './rewards';
 
 export const colors = {
-  forest: '#2D6A4F', deep: '#173D30', yellow: '#FFB703', cream: '#FEFAE0',
+  gold: '#FFD700', forest: '#2D6A4F', deep: '#173D30', yellow: '#FFB703', cream: '#FEFAE0',
   sky: '#219EBC', paleBlue: '#DDF3F6', paleGreen: '#E0EDDD', white: '#FFFDF5',
   line: '#DDDCC3', muted: '#4D6559', danger: '#9A302D',
 };
@@ -35,11 +37,11 @@ export function Button({ title, icon, onPress, tone = 'green', disabled = false 
   );
 }
 
-export function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+export function Chip({ label, selected, onPress, gold }: { label: string; selected: boolean; onPress: () => void; gold?: boolean }) {
   return (
     <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress}
-      style={[styles.chip, selected && styles.selected]}>
-      <Text style={[styles.chipText, selected && styles.selectedText]}>{label}</Text>
+      style={[styles.chip, selected && styles.selected, gold && { backgroundColor: selected ? colors.gold : colors.white, borderColor: colors.gold }]}>
+      <Text style={[styles.chipText, selected && !gold && styles.selectedText]}>{label}</Text>
     </Pressable>
   );
 }
@@ -53,6 +55,25 @@ const art = {
 
 export function Animal({ avatar, size = 88 }: { avatar: Avatar; size?: number }) {
   return <Image source={art[avatar]} style={{ width: size, height: size }} accessible={false} />;
+}
+
+export function ExplorerAvatar({ avatar, rewards, size = 88 }: { avatar: Avatar; rewards: Rewards; size?: number }) {
+  return (
+    <View accessible={false} style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      {rewards.captain ? <View style={{ borderRadius: size / 2, borderWidth: 3, borderColor: colors.gold, overflow: 'hidden' }}>
+        <Image source={require('../assets/icon.png')} style={{ width: size - 6, height: size - 6 }} />
+      </View> : <Animal avatar={avatar} size={size} />}
+      {rewards.accessories.map(item => (
+        <View key={item} style={{
+          position: 'absolute', padding: 3, borderRadius: 30, backgroundColor: colors.gold,
+          ...(item === 'hat' ? { top: 0, right: 0 } : item === 'backpack' ? { bottom: 0, left: 0 } : { bottom: 0, right: 0 }),
+        }}>
+          <MaterialCommunityIcons name={item === 'hat' ? 'hat-fedora' : item === 'backpack' ? 'bag-personal' : 'binoculars'}
+            size={size * 0.24} color={colors.deep} />
+        </View>
+      ))}
+    </View>
+  );
 }
 
 export const styles = StyleSheet.create({

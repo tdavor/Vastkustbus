@@ -14,7 +14,7 @@ Spelet är utformat för att vara extremt enkelt att använda utomhus utan att t
 2. **Välj uppdrag:** Föräldern väljer en kategori (eller slumpar fram ett uppdrag), läser upp uppgiften för barnet på 5 sekunder och stoppar sedan tillbaka telefonen i fickan.
 3. **Utforska och lös uppgiften:** Barnet och föräldern genomför aktiviteten tillsammans (t.ex. letar efter ett löv större än handen, bygger ett insektshotell eller vinkar till en blå spårvagn).
 4. **Dokumentera & Samla XP:** När uppdraget är klart tar föräldern ett foto på resultatet eller barnet. Appen sparar automatiskt GPS-platsen och delar ut erfarenhetspoäng (**XP**).
-5. **Gå upp i nivå & Dela minnen:** Varje **300 XP** tar barnet till en ny nivå. Alla äventyr sparas i en lokal minnesbok där föräldern med ett klick kan skapa ett färdigt "Västkustbus-vykort" och dela det på Facebook eller andra sociala medier.
+5. **Gå upp i nivå & Dela minnen:** Varje **150 XP** tar barnet till en ny nivå. Alla äventyr sparas i en lokal minnesbok där föräldern med ett klick kan skapa ett färdigt "Västkustbus-vykort" och dela det på Facebook eller andra sociala medier.
 
 ---
 
@@ -27,10 +27,12 @@ Appen innehåller **20 förinlagda uppdrag** anpassade för förskolebarn i Göt
 * 🏘️ **Grannskap & Stadspromenad (Haga, Linné, Kvarteret):** Uppdrag som fungerar överallt (t.ex. *Hoppa i vattenpölar*, *Färgjakt: Gult*, *Skuggmonster*, *Härma en staty*).
 
 ### Poäng (XP) och Nivåer
-* **Enkla uppdrag:** 50 XP (t.ex. hitta en rund sten, titta på molnformer).
-* **Medelsvåra uppdrag:** 75 XP (t.ex. balansera på en stock, bygga stentorn).
-* **Större äventyr:** 100 XP (t.ex. bygga ett insektshotell, hitta ett lejon/staty).
-* **Nivåsystem:** Var 300:e XP låser upp en ny utforskarnivå med tillhörande titel på vykortet.
+
+Första gången ger full XP. Upprepade uppdrag ger hälften. Skattkistan låser upp belöningar vid 300, 600, 1000 och 1500 XP.
+* **Enkla uppdrag:** 100 XP (t.ex. hitta en rund sten, titta på molnformer).
+* **Medelsvåra uppdrag:** 150 XP (t.ex. balansera på en stock, bygga stentorn).
+* **Större äventyr:** 200 XP (t.ex. bygga ett insektshotell, hitta ett lejon/staty).
+* **Nivåsystem:** Var 150:e XP låser upp en ny utforskarnivå med tillhörande titel på vykortet.
 
 ---
 
@@ -66,7 +68,7 @@ The app is designed to be effortless to use outdoors without taking attention aw
 2. **Pick a Mission:** The parent selects a category (or shuffles a random task), reads the mission aloud in 5 seconds, and puts the phone back in their pocket.
 3. **Explore & Complete Together:** Parent and child complete the activity together (e.g., finding a leaf bigger than their hand, building a bug hotel, or waving at a blue tram).
 4. **Capture & Earn XP:** Once completed, the parent snaps a photo of the discovery or the child. The app automatically logs the GPS coordinates and awards Experience Points (**XP**).
-5. **Level Up & Share Memories:** Every **300 XP** advances the child to a new Explorer Level. All completed missions are saved in a private Memory Book, where parents can generate a styled "Västkustbus Postcard" with one tap and share it on Facebook or other social apps.
+5. **Level Up & Share Memories:** Every **150 XP** advances the child to a new Explorer Level. All completed missions are saved in a private Memory Book, where parents can generate a styled "Västkustbus Postcard" with one tap and share it on Facebook or other social apps.
 
 ---
 
@@ -79,10 +81,10 @@ The app comes pre-loaded with **20 Gothenburg-inspired preschool missions**, div
 * 🏘️ **Neighborhood & City Walk (Haga, Linné, Anywhere):** Everyday missions playable anywhere (e.g., *Puddle Jumper*, *Color Hunt: Yellow*, *Shadow Monster*, *Statue Pose*).
 
 ### Points (XP) & Leveling
-* **Quick Tasks:** 50 XP (e.g., finding the roundest pebble, spotting cloud shapes).
-* **Active Challenges:** 75 XP (e.g., balancing on a fallen log, stacking 4 stones).
-* **Big Adventures:** 100 XP (e.g., building a bug hotel, finding a city statue).
-* **Level Progression:** Every 300 XP unlocks a new level and updates the child's explorer title on shareable postcards.
+* **Quick Tasks:** 100 XP (e.g., finding the roundest pebble, spotting cloud shapes).
+* **Active Challenges:** 150 XP (e.g., balancing on a fallen log, stacking 4 stones).
+* **Big Adventures:** 200 XP (e.g., building a bug hotel, finding a city statue).
+* **Level Progression:** Every 150 XP unlocks a new level and updates the child's explorer title on shareable postcards.
 
 ---
 
@@ -118,7 +120,7 @@ The app is designed to be effortless to use outdoors without taking attention aw
 2. **Pick a Mission:** The parent selects a category (or shuffles a random task), reads the mission aloud in 5 seconds, and puts the phone back in their pocket.
 3. **Explore & Complete Together:** Parent and child complete the activity together (e.g., finding a leaf bigger than their hand, building a bug hotel, or waving at a blue tram).
 4. **Capture & Earn XP:** Once completed, the parent snaps a photo of the discovery or the child. The app automatically logs the GPS coordinates and awards Experience Points (**XP**).
-5. **Level Up & Share Memories:** Every **300 XP** advances the child to a new Explorer Level. All completed missions are saved in a private Memory Book, where parents can generate a styled "Västkustbus Postcard" with one tap and share it on Facebook or other social apps.
+5. **Level Up & Share Memories:** Every **150 XP** advances the child to a new Explorer Level. All completed missions are saved in a private Memory Book, where parents can generate a styled "Västkustbus Postcard" with one tap and share it on Facebook or other social apps.
 
 ---
 
@@ -131,10 +133,10 @@ The app comes pre-loaded with **20 Gothenburg-inspired preschool missions**, div
 * 🏘️ **Neighborhood & City Walk (Haga, Linné, Anywhere):** Everyday missions playable anywhere (e.g., *Puddle Jumper*, *Color Hunt: Yellow*, *Shadow Monster*, *Statue Pose*).
 
 ### Points (XP) & Leveling
-* **Quick Tasks:** 50 XP (e.g., finding the roundest pebble, spotting cloud shapes).
-* **Active Challenges:** 75 XP (e.g., balancing on a fallen log, stacking 4 stones).
-* **Big Adventures:** 100 XP (e.g., building a bug hotel, finding a city statue).
-* **Level Progression:** Every 300 XP unlocks a new level and updates the child's explorer title on shareable postcards.
+* **Quick Tasks:** 100 XP (e.g., finding the roundest pebble, spotting cloud shapes).
+* **Active Challenges:** 150 XP (e.g., balancing on a fallen log, stacking 4 stones).
+* **Big Adventures:** 200 XP (e.g., building a bug hotel, finding a city statue).
+* **Level Progression:** Every 150 XP unlocks a new level and updates the child's explorer title on shareable postcards.
 
 ---
 

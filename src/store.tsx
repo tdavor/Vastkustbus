@@ -2,7 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Directory, File, Paths } from 'expo-file-system';
 import { getLocales } from 'expo-localization';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import type { Avatar, Language } from './missions';
+import { missions, type Avatar, type Language } from './missions';
+import { initialRewards, missionXP, reachedMilestones, totalXP, type Milestone, type Rewards } from './rewards';
 
 export type Coordinates = { latitude: number; longitude: number };
 export type Place = { text: string } | { tag: string };
@@ -16,10 +17,10 @@ export type Memory = {
   coordinates?: Coordinates;
 };
 type Profile = { name: string; avatar: Avatar };
-type Journal = { version: 1; language: Language; profile?: Profile; memories: Memory[] };
+type Journal = { version: 1; language: Language; profile?: Profile; memories: Memory[]; rewards: Rewards };
 const key = 'goteborg-explorer.journal.v1';
 const initial: Journal = {
-  version: 1, language: getLocales()[0]?.languageCode === 'sv' ? 'sv' : 'en', memories: [],
+  version: 1, language: getLocales()[0]?.languageCode === 'sv' ? 'sv' : 'en', memories: [], rewards: initialRewards,
 };
 
 const photoDirectory = () => new Directory(Paths.document, 'memories');
@@ -52,6 +53,11 @@ function useJournalState() {
       if (data.version !== 1 || !Array.isArray(data.memories) || !['en', 'sv'].includes(data.language)) {
         throw new Error('Invalid journal');
       }
+      const rewards = { ...initialRewards, ...data.rewards, unlocked: reachedMilestones(totalXP(data.memories)) };
+      if (raw && (!data.rewards || data.rewards.unlocked?.join() !== rewards.unlocked.join())) {
+        await AsyncStorage.setItem(key, JSON.stringify({ ...data, rewards }));
+      }
+      data.rewards = rewards;
       current.current = data;
       setJournal(data);
       setStatus('ready');
@@ -74,16 +80,39 @@ function useJournalState() {
     return task;
   }
 
+  async function addMemory(memory: Omit<Memory, 'xp'>) {
+    let earned = 0;
+    let unlocked: Milestone[] = [];
+    await update(previous => {
+      const duplicate = previous.memories.find(item => item.id === memory.id);
+      if (duplicate) {
+        earned = duplicate.xp;
+        return previous;
+      }
+      const mission = missions.find(item => item.id === memory.missionId);
+      if (!mission || (mission.category === 'legendary' && !previous.rewards.unlocked.includes(1000))) {
+        throw new Error('Mission is unavailable');
+      }
+      earned = missionXP(previous.memories, mission.id, mission.xp);
+      const reached = reachedMilestones(totalXP(previous.memories) + earned);
+      unlocked = reached.filter(mark => !previous.rewards.unlocked.includes(mark));
+      return {
+        ...previous,
+        memories: [{ ...memory, xp: earned }, ...previous.memories],
+        rewards: { ...previous.rewards, unlocked: reached },
+      };
+    });
+    return { earned, unlocked };
+  }
+
   return {
     journal, status, load,
-    xp: journal.memories.reduce((total, memory) => total + memory.xp, 0),
+    xp: totalXP(journal.memories),
     setProfile: (profile: Profile) => update(previous => ({ ...previous, profile })),
     setLanguage: (language: Language) => update(previous => ({ ...previous, language })),
-    addMemory: (memory: Memory) => update(previous => (
-      previous.memories.some(item => item.id === memory.id)
-        ? previous
-        : { ...previous, memories: [memory, ...previous.memories] }
-    )),
+    addMemory,
+    updateRewards: (change: (rewards: Rewards) => Rewards) =>
+      update(previous => ({ ...previous, rewards: change(previous.rewards) })),
   };
 }
 

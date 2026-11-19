@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Göteborg Explorer",
+    "slug": "goteborg-explorer",
+    "version": "1.0.0",
+    "scheme": "goteborgexplorer",
+    "platforms": ["android"],
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "android": {
+      "package": "se.goteborgexplorer.app",
+      "allowBackup": false,
+      "permissions": ["CAMERA", "ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_MEDIA_IMAGES", "android.permission.READ_MEDIA_VIDEO"]
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-image-picker", {"photosPermission": false, "microphonePermission": false}],
+      ["expo-location", {"isAndroidBackgroundLocationEnabled": false, "isAndroidForegroundServiceEnabled": false}],
+      ["expo-localization", {"supportedLocales": {"android": ["sv", "en"]}}]
+    ]
+  }
+}

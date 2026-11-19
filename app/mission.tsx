@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Image, Linking, Text, TextInput, View } from 'react-native';
+import { Alert, BackHandler, Image, Linking, Pressable, Text, TextInput, View } from 'react-native';
 import { locate } from '../src/location';
 import { areas, categories, missions, quickTags } from '../src/missions';
 import { savePhoto, useJournal, type Coordinates, type Place } from '../src/store';
@@ -29,6 +29,7 @@ export default function MissionScreen() {
   const t = copy[language];
   const [filter, setFilter] = useState<Filter>('all');
   const [mission, setMission] = useState(() => choose('all'));
+  const [browsing, setBrowsing] = useState(false);
   const [draft, setDraft] = useState<Draft>();
   const [completed, setCompleted] = useState(false);
   const [place, setPlace] = useState<Place>();
@@ -42,6 +43,15 @@ export default function MissionScreen() {
   const [error, setError] = useState('');
 
   useEffect(() => () => { request.current += 1; }, []);
+
+  useEffect(() => {
+    if (!browsing) return;
+    const listener = BackHandler.addEventListener('hardwareBackPress', () => {
+      setBrowsing(false);
+      return true;
+    });
+    return () => listener.remove();
+  }, [browsing]);
 
   async function suggestLocation() {
     const token = ++request.current;
@@ -129,8 +139,41 @@ export default function MissionScreen() {
     }
   }
 
+  if (browsing) {
+    return (
+      <Page key="catalog">
+        <Button title={t.back} icon="arrow-back" tone="quiet" onPress={() => setBrowsing(false)} />
+        <Text style={styles.title}>{t.browseMissions}</Text>
+        {(Object.keys(camp) as Array<keyof typeof camp>).map(category => (
+          <View key={category} style={{ gap: 10 }}>
+            <View style={styles.row}>
+              <Ionicons name={camp[category].icon} size={24} color={colors.forest} />
+              <Text accessibilityRole="header" style={styles.heading}>{categories[category][language]}</Text>
+            </View>
+            {missions.filter(item => item.category === category).map(item => (
+              <Pressable key={item.id} accessibilityRole="button" accessibilityState={{ selected: item.id === mission.id }}
+                style={({ pressed }) => [styles.card, { opacity: pressed ? 0.7 : 1 }]}
+                onPress={() => {
+                  setFilter(current => current === 'all' ? current : item.category);
+                  setMission(item);
+                  setError('');
+                  setBrowsing(false);
+                }}>
+                <View style={[styles.row, { justifyContent: 'space-between' }]}>
+                  <Text style={[styles.brand, { flexShrink: 1 }]}>{item.title[language]}</Text>
+                  <Text style={styles.small}>+{item.xp} XP</Text>
+                </View>
+                <Text style={styles.body}>{item.description[language]}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ))}
+      </Page>
+    );
+  }
+
   return (
-    <Page>
+    <Page key="mission">
       <Button title={completed ? t.home : t.back} icon="arrow-back" tone="quiet" onPress={() => router.back()} disabled={busy} />
       {completed ? <>
         <View style={[styles.card, { alignItems: 'center', backgroundColor: '#FFE8A3', paddingVertical: 36 }]}>
@@ -191,6 +234,7 @@ export default function MissionScreen() {
           <Text style={styles.small}>{areas[mission.category][language]}</Text>
         </View>
         <Button title={t.camera} icon="camera-outline" tone="yellow" disabled={busy} onPress={() => { void takePhoto(); }} />
+        <Button title={t.browseMissions} icon="list-outline" tone="quiet" disabled={busy} onPress={() => setBrowsing(true)} />
         <Button title={t.shuffle} icon="shuffle" tone="quiet" disabled={busy} onPress={() => setMission(choose(filter, mission.id))} />
       </>}
       {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}

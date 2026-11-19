@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { avatars, levelFor, type Avatar } from '../src/missions';
 import { useJournal } from '../src/store';
-import { copy } from '../src/text';
+import { appName, copy } from '../src/text';
 import { Animal, Button, Chip, colors, Page, styles } from '../src/ui';
 
 export default function Home() {
@@ -26,7 +26,7 @@ export default function Home() {
     <Page>
       <View style={styles.row}>
         <Ionicons name="compass" size={27} color={colors.forest} />
-        <Text style={styles.brand}>Västkustbus</Text>
+        <Text style={styles.brand}>{appName}</Text>
       </View>
       {profile ? <>
         <View style={[styles.card, { backgroundColor: colors.paleGreen }]}>

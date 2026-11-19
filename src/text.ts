@@ -1,3 +1,5 @@
+export const appName = 'Västkustbus';
+
 export const copy = {
   en: {
     updateTitle: 'Update available', updateMessage: 'Version {version} is available on GitHub.',
@@ -5,7 +7,7 @@ export const copy = {
     welcome: 'Ready to explore?', intro: 'Pick an animal and make an explorer profile together.',
     name: 'Child’s name', avatar: 'Choose an animal', begin: 'Let’s explore', language: 'Language',
     level: 'Level', nextLevel: 'XP to the next level', start: 'Start New Mission', book: 'Memory Book',
-    mission: 'Mission', shuffle: 'Shuffle / Next Mission', camera: 'Mission Complete! Take Photo',
+    mission: 'Mission', browseMissions: 'Browse all missions', shuffle: 'Shuffle / Next Mission', camera: 'Mission Complete! Take Photo',
     where: 'Where did you explore?', place: 'Location tag', save: 'Save memory', retake: 'Retake photo',
     skip: 'Save without a location', locating: 'Looking for a location suggestion…',
     noGps: 'You can choose or type a place even without GPS.', saved: 'Mission complete!',
@@ -28,7 +30,7 @@ export const copy = {
     welcome: 'Redo att upptäcka?', intro: 'Välj ett djur och skapa en upptäckarprofil tillsammans.',
     name: 'Barnets namn', avatar: 'Välj ett djur', begin: 'Nu ger vi oss ut', language: 'Språk',
     level: 'Nivå', nextLevel: 'XP till nästa nivå', start: 'Starta nytt uppdrag', book: 'Minnesbok',
-    mission: 'Uppdrag', shuffle: 'Slumpa nästa uppdrag', camera: 'Uppdrag klart! Ta ett foto',
+    mission: 'Uppdrag', browseMissions: 'Visa alla uppdrag', shuffle: 'Slumpa nästa uppdrag', camera: 'Uppdrag klart! Ta ett foto',
     where: 'Var var ni på upptäcktsfärd?', place: 'Plats', save: 'Spara minnet', retake: 'Ta om fotot',
     skip: 'Spara utan plats', locating: 'Söker efter ett platsförslag…',
     noGps: 'Du kan välja eller skriva en plats även utan GPS.', saved: 'Uppdraget är klart!',

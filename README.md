@@ -1,6 +1,6 @@
-# Göteborg Explorer
+# Västkustbus
 
-Göteborg Explorer is an Android app for exploring outdoors with children ages 3–6. It has 20 built-in missions in Swedish and English, animal avatars, XP, a photo Memory Book, and shareable postcards. The home screen has a language picker. The first launch defaults to Swedish on a Swedish device and English otherwise.
+Västkustbus is an Android app for exploring outdoors with children ages 3–6. It has 20 built-in missions in Swedish and English, animal avatars, XP, a photo Memory Book, and shareable postcards. The home screen has a language picker. The first launch defaults to Swedish on a Swedish device and English otherwise.
 
 ## Run on Android
 
@@ -19,7 +19,7 @@ npx eas-cli login
 npx eas-cli build --platform android --profile preview
 ```
 
-The EAS build service is only used to build the APK. The installed app does not need an account, backend, or network to open missions, capture photos, record progress, or create postcards.
+The EAS build service is only used to build the APK. The installed app does not need an account, backend, or network to open missions, capture photos, record progress, or create postcards. On startup it checks public GitHub version tags in the background and offers to open the releases page when a newer stable version is available. A tag identifies a source version. To distribute an update, attach the signed APK to a GitHub Release for that tag.
 
 ## How it works
 

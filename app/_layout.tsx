@@ -2,12 +2,14 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, Text } from 'react-native';
 import { JournalProvider, useJournal } from '../src/store';
+import { useStartupUpdate } from '../src/updates';
 import { copy } from '../src/text';
 import { Button, colors, Page, styles } from '../src/ui';
 
 function Routes() {
   const { status, journal, load } = useJournal();
   const t = copy[journal.language];
+  useStartupUpdate(status === 'ready', journal.language);
   if (status !== 'ready') {
     return <Page>{status === 'loading' ? <ActivityIndicator color={colors.forest} /> : <>
       <Text style={styles.body}>{t.storageError}</Text>

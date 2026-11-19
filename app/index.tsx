@@ -26,7 +26,7 @@ export default function Home() {
     <Page>
       <View style={styles.row}>
         <Ionicons name="compass" size={27} color={colors.forest} />
-        <Text style={styles.brand}>Göteborg Explorer</Text>
+        <Text style={styles.brand}>Västkustbus</Text>
       </View>
       {profile ? <>
         <View style={[styles.card, { backgroundColor: colors.paleGreen }]}>

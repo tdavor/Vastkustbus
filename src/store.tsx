@@ -3,7 +3,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import { getLocales } from 'expo-localization';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { missions, type Avatar, type Language } from './missions';
-import { initialRewards, missionXP, reachedMilestones, totalXP, type Milestone, type Rewards } from './rewards';
+import { currentRun, initialRewards, missionXP, reachedMilestones, totalXP, type Milestone, type Rewards } from './rewards';
 
 export type Coordinates = { latitude: number; longitude: number };
 export type Place = { text: string } | { tag: string };
@@ -17,7 +17,7 @@ export type Memory = {
   coordinates?: Coordinates;
 };
 type Profile = { name: string; avatar: Avatar };
-type Journal = { version: 1; language: Language; profile?: Profile; memories: Memory[]; rewards: Rewards };
+type Journal = { version: 1; language: Language; profile?: Profile; memories: Memory[]; previousRunCount?: number; rewards: Rewards };
 const key = 'goteborg-explorer.journal.v1';
 const initial: Journal = {
   version: 1, language: getLocales()[0]?.languageCode === 'sv' ? 'sv' : 'en', memories: [], rewards: initialRewards,
@@ -53,7 +53,7 @@ function useJournalState() {
       if (data.version !== 1 || !Array.isArray(data.memories) || !['en', 'sv'].includes(data.language)) {
         throw new Error('Invalid journal');
       }
-      const rewards = { ...initialRewards, ...data.rewards, unlocked: reachedMilestones(totalXP(data.memories)) };
+      const rewards = { ...initialRewards, ...data.rewards, unlocked: reachedMilestones(totalXP(currentRun(data.memories, data.previousRunCount))) };
       if (raw && (!data.rewards || data.rewards.unlocked?.join() !== rewards.unlocked.join())) {
         await AsyncStorage.setItem(key, JSON.stringify({ ...data, rewards }));
       }
@@ -93,8 +93,9 @@ function useJournalState() {
       if (!mission || (mission.category === 'legendary' && !previous.rewards.unlocked.includes(1000))) {
         throw new Error('Mission is unavailable');
       }
-      earned = missionXP(previous.memories, mission.id, mission.xp);
-      const reached = reachedMilestones(totalXP(previous.memories) + earned);
+      const active = currentRun(previous.memories, previous.previousRunCount);
+      earned = missionXP(active, mission.id, mission.xp);
+      const reached = reachedMilestones(totalXP(active) + earned);
       unlocked = reached.filter(mark => !previous.rewards.unlocked.includes(mark));
       return {
         ...previous,
@@ -105,9 +106,13 @@ function useJournalState() {
     return { earned, unlocked };
   }
 
+  const activeMemories = currentRun(journal.memories, journal.previousRunCount);
   return {
-    journal, status, load,
-    xp: totalXP(journal.memories),
+    journal, status, load, activeMemories,
+    xp: totalXP(activeMemories),
+    resetProgress: () => update(previous => ({
+      ...previous, previousRunCount: previous.memories.length, rewards: initialRewards,
+    })),
     setProfile: (profile: Profile) => update(previous => ({ ...previous, profile })),
     setLanguage: (language: Language) => update(previous => ({ ...previous, language })),
     addMemory,

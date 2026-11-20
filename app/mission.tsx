@@ -27,7 +27,7 @@ function choose(available: typeof missions, filter: Filter, except?: number) {
 }
 
 export default function MissionScreen() {
-  const { journal: { language, memories, rewards }, addMemory } = useJournal();
+  const { journal: { language, rewards }, activeMemories, addMemory } = useJournal();
   const t = copy[language];
   const r = rewardsCopy[language];
   const legendary = rewards.unlocked.includes(1000);
@@ -170,7 +170,7 @@ export default function MissionScreen() {
                 }}>
                 <View style={[styles.row, { justifyContent: 'space-between' }]}>
                   <Text style={[styles.brand, { flexShrink: 1 }]}>{item.title[language]}</Text>
-                  <Text style={styles.small}>+{missionXP(memories, item.id, item.xp)} XP</Text>
+                  <Text style={styles.small}>+{missionXP(activeMemories, item.id, item.xp)} XP</Text>
                 </View>
                 <Text style={styles.body}>{item.description[language]}</Text>
               </Pressable>
@@ -252,7 +252,7 @@ export default function MissionScreen() {
         <View style={[styles.card, { backgroundColor: camp[mission.category].color }]}>
           <View style={[styles.row, { justifyContent: 'space-between' }]}>
             <Ionicons name={camp[mission.category].icon} size={37} color={colors.forest} />
-            <Text style={styles.brand}>+{missionXP(memories, mission.id, mission.xp)} XP</Text>
+            <Text style={styles.brand}>+{missionXP(activeMemories, mission.id, mission.xp)} XP</Text>
           </View>
           <Text style={styles.heading}>{mission.title[language]}</Text>
           <Text style={styles.body}>{mission.description[language]}</Text>

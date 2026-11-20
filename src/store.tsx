@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import { missions, type Language } from './missions';
 import { emptyProgress, replacePlayer, restoreFamily, type Family, type Memory, type Profile } from './journal';
 export type { Coordinates, Memory, Place } from './journal';
-import { currentRun, initialRewards, missionXP, reachedMilestones, totalXP, type Milestone, type Rewards } from './rewards';
+import { currentRun, missionXP, reachedMilestones, totalXP, type Milestone, type Rewards } from './rewards';
 
 const key = 'goteborg-explorer.journal.v1';
 const initial: Family = {
@@ -29,9 +29,19 @@ export function savePhoto(uri: string, name: string) {
   }
 }
 
+const pendingReset = JSON.stringify({ ...initial, resetPending: true });
+
+async function finishReset() {
+  const photos = photoDirectory();
+  if (photos.exists) photos.delete();
+  await AsyncStorage.removeItem(key);
+  return initial;
+}
+
 function useJournalState() {
   const [family, setFamily] = useState(initial);
   const current = useRef(initial);
+  const resetInProgress = useRef(false);
   const queue = useRef<Promise<void>>(Promise.resolve());
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 
@@ -39,12 +49,14 @@ function useJournalState() {
     setStatus('loading');
     try {
       const raw = await AsyncStorage.getItem(key);
-      const data = raw ? restoreFamily(JSON.parse(raw)) : initial;
-      if (raw && JSON.stringify(data) !== raw) {
+      const stored = raw ? JSON.parse(raw) : null;
+      const data = stored?.resetPending ? await finishReset() : stored ? restoreFamily(stored) : initial;
+      if (stored && !stored.resetPending && JSON.stringify(data) !== raw) {
         await AsyncStorage.setItem(key, JSON.stringify(data));
       }
       current.current = data;
       setFamily(data);
+      resetInProgress.current = false;
       setStatus('ready');
     } catch {
       setStatus('error');
@@ -53,16 +65,38 @@ function useJournalState() {
 
   useEffect(() => { void load(); }, []);
 
+  function enqueue(action: () => Promise<void>) {
+    const task = queue.current.then(action);
+    queue.current = task.catch(() => {});
+    return task;
+  }
+
   function update(change: (previous: Family) => Family) {
-    const task = queue.current.then(async () => {
+    return enqueue(async () => {
+      if (resetInProgress.current) throw new Error('Reset is incomplete');
       const next = change(current.current);
       if (next === current.current) return;
       await AsyncStorage.setItem(key, JSON.stringify(next));
       current.current = next;
       setFamily(next);
     });
-    queue.current = task.catch(() => {});
-    return task;
+  }
+
+  function resetGame() {
+    return enqueue(async () => {
+      await AsyncStorage.setItem(key, pendingReset);
+      resetInProgress.current = true;
+      current.current = initial;
+      setStatus('loading');
+      try {
+        setFamily(await finishReset());
+        resetInProgress.current = false;
+        setStatus('ready');
+      } catch (error) {
+        setStatus('error');
+        throw error;
+      }
+    });
   }
 
   async function addMemory(memory: Omit<Memory, 'xp'>) {
@@ -98,9 +132,7 @@ function useJournalState() {
     journal, status, load, activeMemories,
     players: family.players, activePlayerId: family.activeId,
     xp: totalXP(activeMemories),
-    resetProgress: () => update(state => replacePlayer(state, family.activeId, player => ({
-      ...player, previousRunCount: player.memories.length, rewards: initialRewards,
-    }))),
+    resetGame,
     addPlayer: (profile: Profile) => update(previous => {
       const id = randomUUID();
       return { ...previous, activeId: id, players: [...previous.players, { ...emptyProgress, profile, id }] };

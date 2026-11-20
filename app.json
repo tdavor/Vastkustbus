@@ -2,14 +2,14 @@
   "expo": {
     "name": "Västkustbus",
     "slug": "goteborg-explorer",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "scheme": "goteborgexplorer",
     "platforms": ["android"],
     "userInterfaceStyle": "light",
     "icon": "./assets/launcher.png",
     "android": {
       "package": "se.goteborgexplorer.app",
-      "versionCode": 9,
+      "versionCode": 10,
       "adaptiveIcon": {
         "foregroundImage": "./assets/launcher.png",
         "backgroundColor": "#FEFAE0"

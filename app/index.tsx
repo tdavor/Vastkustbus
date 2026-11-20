@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, Linking, Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Alert, Image, Linking, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { avatars, levelFor, type Avatar } from '../src/missions';
 import { useJournal } from '../src/store';
 import { appName, copy } from '../src/text';
@@ -22,8 +22,6 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const [settings, setSettings] = useState<'main' | 'add' | 'about'>();
   const [linkError, setLinkError] = useState(false);
-  const { height, width } = useWindowDimensions();
-  const artworkSize = Math.min(width * 0.64, height * 0.31, 232);
   const r = rewardsCopy[language];
   const next = milestones.find(mark => xp < mark);
   const previous = [...milestones].reverse().find(mark => xp >= mark) ?? 0;
@@ -76,15 +74,35 @@ export default function Home() {
 
   return (
     <Page>
-      <Pressable accessibilityRole="button" accessibilityLabel={t.gameSettings}
-        onPress={() => { setError(false); setSettings('main'); }}
-        style={[styles.quiet, { alignSelf: 'flex-end', borderRadius: 16, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }]}>
-        <Ionicons name="settings-outline" size={25} color={colors.deep} />
-      </Pressable>
-      <View style={{ alignItems: 'center', gap: 14, paddingBottom: 15 }}>
-        <Image accessible={false} source={require('../assets/launcher.png')}
-          style={{ width: artworkSize, height: artworkSize, borderRadius: 34 }} />
-        <Text accessibilityRole="header" style={[styles.title, { textAlign: 'center' }]}>{appName}</Text>
+      <View style={{ borderRadius: 30, overflow: 'hidden', backgroundColor: colors.paleBlue }}>
+        <View pointerEvents="none" importantForAccessibility="no-hide-descendants"
+          style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
+          <Image source={require('../assets/home-coast.webp')} resizeMode="cover"
+            style={{ width: '100%', height: '100%' }} />
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel={t.gameSettings}
+          onPress={() => { setError(false); setSettings('main'); }}
+          style={{ alignSelf: 'flex-end', marginTop: 10, marginRight: 10, borderRadius: 16, width: 48, height: 48,
+            alignItems: 'center', justifyContent: 'center', backgroundColor: colors.white }}>
+          <Ionicons name="settings-outline" size={25} color={colors.deep} />
+        </Pressable>
+        <View style={{ alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingBottom: 16 }}>
+          <Image accessible={false} source={require('../assets/launcher.png')}
+            style={{ width: 88, height: 88, borderRadius: 23 }} />
+          <Text accessibilityRole="header" style={[styles.title, {
+            textAlign: 'center', backgroundColor: colors.cream, borderRadius: 20,
+            paddingHorizontal: 14, paddingVertical: 3, overflow: 'hidden',
+          }]}>{appName}</Text>
+          <View accessible={false} importantForAccessibility="no-hide-descendants"
+            style={{ width: '100%', maxWidth: 340, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+            {(['moose', 'fox', 'seal', 'puffin'] as const).map((animal, index) => (
+              <View key={animal} style={{ padding: 3, borderRadius: 36, backgroundColor: colors.white,
+                transform: [{ rotate: index % 2 === 0 ? '-8deg' : '8deg' }] }}>
+                <Animal avatar={animal} size={48} />
+              </View>
+            ))}
+          </View>
+        </View>
       </View>
       <Modal transparent visible={Boolean(settings)} animationType="fade" onRequestClose={backFromSettings}>
         <View style={{ flex: 1, backgroundColor: '#173D30A0', justifyContent: 'center', padding: 20 }}>

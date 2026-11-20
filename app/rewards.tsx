@@ -11,7 +11,7 @@ import { copy } from '../src/text';
 import { Button, Chip, colors, ExplorerAvatar, Page, styles } from '../src/ui';
 
 export default function RewardsScreen() {
-  const { journal: { rewards, profile, memories, language }, xp, updateRewards } = useJournal();
+  const { journal: { rewards, profile, memories, language }, xp, activeMemories, updateRewards } = useJournal();
   const r = rewardsCopy[language];
   const t = copy[language];
   const capture = useRef<View>(null);
@@ -109,7 +109,7 @@ export default function RewardsScreen() {
               <Text style={[styles.heading, { textAlign: 'center' }]}>{r.diploma}</Text>
               <ExplorerAvatar avatar={profile.avatar} rewards={rewards} />
               <Text style={[styles.title, { textAlign: 'center' }]}>{profile.name}</Text>
-              <Text style={styles.small}>{r.count} · {memories.length}</Text>
+              <Text style={styles.small}>{r.count} · {activeMemories.length}</Text>
               <Text style={styles.small}>{new Date().toLocaleDateString(language === 'sv' ? 'sv-SE' : 'en-GB')}</Text>
               {favorite && <MemoryPhoto key={favorite.id} memory={favorite} language={language}
                 onLoaded={() => setLoadedPhoto(favorite.id)} />}

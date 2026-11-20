@@ -4,6 +4,9 @@ export const copy = {
   en: {
     updateTitle: 'Update available', updateMessage: 'Version {version} is available on GitHub.',
     viewUpdate: 'View updates',
+    gameSettings: 'Settings', resetProgress: 'Reset game to 0 XP',
+    resetConfirm: 'Reset game progress?', resetDetails: 'XP, completed missions and rewards will start over. Your profile and Memory Book photos are kept.',
+    resetDone: 'Game reset to 0 XP.',
     welcome: 'Ready to explore?', intro: 'Pick an animal and make an explorer profile together.',
     name: 'Child’s name', avatar: 'Choose an animal', begin: 'Let’s explore', language: 'Language',
     level: 'Level', nextLevel: 'XP to the next level', start: 'Start New Mission', book: 'Memory Book',
@@ -27,6 +30,9 @@ export const copy = {
   sv: {
     updateTitle: 'Uppdatering tillgänglig', updateMessage: 'Version {version} finns på GitHub.',
     viewUpdate: 'Visa uppdateringar',
+    gameSettings: 'Inställningar', resetProgress: 'Nollställ spelet',
+    resetConfirm: 'Nollställa spelet?', resetDetails: 'XP, avklarade uppdrag och belöningar börjar om från noll. Profilen och bilderna i minnesboken sparas.',
+    resetDone: 'Spelet har nollställts till 0 XP.',
     welcome: 'Redo att upptäcka?', intro: 'Välj ett djur och skapa en upptäckarprofil tillsammans.',
     name: 'Barnets namn', avatar: 'Välj ett djur', begin: 'Nu ger vi oss ut', language: 'Språk',
     level: 'Nivå', nextLevel: 'XP till nästa nivå', start: 'Starta nytt uppdrag', book: 'Minnesbok',

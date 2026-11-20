@@ -13,6 +13,9 @@ export type Rewards = {
 
 export const initialRewards: Rewards = { unlocked: [], accessories: [], captain: false, texts: {} };
 export const reachedMilestones = (xp: number) => milestones.filter(mark => xp >= mark);
+export function currentRun<T>(memories: readonly T[], previousRunCount = 0) {
+  return memories.slice(0, Math.max(0, memories.length - previousRunCount));
+}
 export const totalXP = (memories: readonly { xp: number }[]) => memories.reduce((total, memory) => total + memory.xp, 0);
 export function missionXP(memories: readonly { missionId: number }[], missionId: number, base: number) {
   return memories.some(memory => memory.missionId === missionId) ? base / 2 : base;

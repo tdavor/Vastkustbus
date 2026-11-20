@@ -13,7 +13,7 @@ const authorEmail = 'tdavor@gmail.com';
 const supportUrl = 'https://buymeacoffee.com/wjkrddbhyx';
 
 export default function Home() {
-  const { journal, xp, setLanguage, addPlayer, selectPlayer, players, activePlayerId, resetProgress } = useJournal();
+  const { journal, xp, setLanguage, addPlayer, selectPlayer, players, activePlayerId, resetGame } = useJournal();
   const { language, profile } = journal;
   const t = copy[language];
   const [name, setName] = useState('');
@@ -111,15 +111,17 @@ export default function Home() {
                 </>}
                 <Button title={t.addPlayer} icon="person-add-outline" tone="quiet" disabled={busy}
                   onPress={() => { setName(''); setAvatar('moose'); setError(false); setSettings('add'); }} />
-                {profile && <Button title={t.resetProgress} icon="refresh-outline" disabled={busy || xp === 0}
+                <Button title={t.resetProgress} icon="refresh-outline" disabled={busy}
                   tone="quiet" onPress={() => Alert.alert(t.resetConfirm, t.resetDetails, [
                     { text: t.cancel, style: 'cancel' },
                     { text: t.resetProgress, style: 'destructive', onPress: () => void apply(async () => {
-                      await resetProgress();
+                      await resetGame();
+                      setName('');
+                      setAvatar('moose');
                       setSettings(undefined);
                       Alert.alert(t.resetDone);
                     }) },
-                  ])} />}
+                  ])} />
                 <Button title={t.about} icon="information-circle-outline" tone="quiet" onPress={() => setSettings('about')} />
               </>}
               {settings === 'add' && <>

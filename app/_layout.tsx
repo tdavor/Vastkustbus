@@ -1,20 +1,46 @@
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, Text } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Image, Text, useWindowDimensions, View } from 'react-native';
 import { JournalProvider, useJournal } from '../src/store';
 import { useStartupUpdate } from '../src/updates';
-import { copy } from '../src/text';
+import { appName, copy } from '../src/text';
 import { Button, colors, Page, styles } from '../src/ui';
+
+void SplashScreen.preventAutoHideAsync().catch(() => {});
+
+function StartupScreen() {
+  const { width, height } = useWindowDimensions();
+  const size = Math.min(240, width * 0.64, height * 0.45);
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.cream, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+      <Image source={require('../assets/launcher.png')} resizeMode="contain"
+        style={{ width: size, height: size, borderRadius: 34 }}
+        onLoadEnd={() => { void SplashScreen.hideAsync().catch(() => {}); }} />
+      <Text accessibilityRole="header" style={[styles.title, { textAlign: 'center' }]}>{appName}</Text>
+    </View>
+  );
+}
 
 function Routes() {
   const { status, journal, load } = useJournal();
   const t = copy[journal.language];
-  useStartupUpdate(status === 'ready', journal.language);
+  const [showStartup, setShowStartup] = useState(true);
+  useEffect(() => {
+    const timeout = setTimeout(() => setShowStartup(false), 750);
+    return () => clearTimeout(timeout);
+  }, []);
+  useEffect(() => {
+    if (!showStartup && status !== 'loading') void SplashScreen.hideAsync().catch(() => {});
+  }, [showStartup, status]);
+  useStartupUpdate(status === 'ready' && !showStartup, journal.language);
+  if (showStartup || status === 'loading') return <StartupScreen />;
   if (status !== 'ready') {
-    return <Page>{status === 'loading' ? <ActivityIndicator color={colors.forest} /> : <>
+    return <Page>
       <Text style={styles.body}>{t.storageError}</Text>
       <Button title={t.retry} icon="reload" onPress={() => { void load(); }} />
-    </>}</Page>;
+    </Page>;
   }
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.cream } }}>

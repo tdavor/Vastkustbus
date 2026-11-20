@@ -1,6 +1,6 @@
 # 🌊🌲 Västkustbus – Utomhusäventyr för föräldrar och förskolebarn
 
-**[Ladda ner Android-APK / Download Android APK (v1.1.1)](https://github.com/tdavor/Vastkustbus/releases/download/v1.1.1/Vastkustbus-v1.1.1.apk)**
+**[Ladda ner Android-APK / Download Android APK (v1.1.2)](https://github.com/tdavor/Vastkustbus/releases/download/v1.1.2/Vastkustbus-v1.1.2.apk)**
 
 **Västkustbus** är en offline-först Android-app skapad för föräldrar och förskolebarn (3–6 år). Målet är att minska skärmtiden genom att använda mobilen enbart som en "fickkompass" och kamera, medan själva leken sker ute i naturen och staden – med fokus på **Göteborg och Västkusten**.
 

@@ -2,20 +2,30 @@
   "expo": {
     "name": "Västkustbus",
     "slug": "goteborg-explorer",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "scheme": "goteborgexplorer",
     "platforms": ["android"],
     "userInterfaceStyle": "light",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/launcher.png",
     "android": {
       "package": "se.goteborgexplorer.app",
-      "versionCode": 4,
+      "versionCode": 5,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/launcher.png",
+        "backgroundColor": "#FEFAE0"
+      },
       "allowBackup": false,
       "permissions": ["CAMERA", "ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
       "blockedPermissions": ["android.permission.RECORD_AUDIO", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.READ_MEDIA_IMAGES", "android.permission.READ_MEDIA_VIDEO"]
     },
     "plugins": [
       "expo-router",
+      ["expo-splash-screen", {
+        "backgroundColor": "#FEFAE0",
+        "image": "./assets/launcher.png",
+        "imageWidth": 170,
+        "resizeMode": "contain"
+      }],
       ["expo-image-picker", {"photosPermission": false, "microphonePermission": false}],
       ["expo-location", {"isAndroidBackgroundLocationEnabled": false, "isAndroidForegroundServiceEnabled": false}],
       ["expo-localization", {"supportedLocales": {"android": ["sv", "en"]}}]

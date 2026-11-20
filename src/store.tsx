@@ -1,26 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { randomUUID } from 'expo-crypto';
 import { Directory, File, Paths } from 'expo-file-system';
 import { getLocales } from 'expo-localization';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { missions, type Avatar, type Language } from './missions';
+import { missions, type Language } from './missions';
+import { emptyProgress, replacePlayer, restoreFamily, type Family, type Memory, type Profile } from './journal';
+export type { Coordinates, Memory, Place } from './journal';
 import { currentRun, initialRewards, missionXP, reachedMilestones, totalXP, type Milestone, type Rewards } from './rewards';
 
-export type Coordinates = { latitude: number; longitude: number };
-export type Place = { text: string } | { tag: string };
-export type Memory = {
-  id: string;
-  missionId: number;
-  xp: number;
-  date: string;
-  photo: string;
-  place?: Place;
-  coordinates?: Coordinates;
-};
-type Profile = { name: string; avatar: Avatar };
-type Journal = { version: 1; language: Language; profile?: Profile; memories: Memory[]; previousRunCount?: number; rewards: Rewards };
 const key = 'goteborg-explorer.journal.v1';
-const initial: Journal = {
-  version: 1, language: getLocales()[0]?.languageCode === 'sv' ? 'sv' : 'en', memories: [], rewards: initialRewards,
+const initial: Family = {
+  version: 2, language: getLocales()[0]?.languageCode === 'sv' ? 'sv' : 'en', players: [],
 };
 
 const photoDirectory = () => new Directory(Paths.document, 'memories');
@@ -40,7 +30,7 @@ export function savePhoto(uri: string, name: string) {
 }
 
 function useJournalState() {
-  const [journal, setJournal] = useState(initial);
+  const [family, setFamily] = useState(initial);
   const current = useRef(initial);
   const queue = useRef<Promise<void>>(Promise.resolve());
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -49,17 +39,12 @@ function useJournalState() {
     setStatus('loading');
     try {
       const raw = await AsyncStorage.getItem(key);
-      const data: Journal = raw ? JSON.parse(raw) : initial;
-      if (data.version !== 1 || !Array.isArray(data.memories) || !['en', 'sv'].includes(data.language)) {
-        throw new Error('Invalid journal');
+      const data = raw ? restoreFamily(JSON.parse(raw)) : initial;
+      if (raw && JSON.stringify(data) !== raw) {
+        await AsyncStorage.setItem(key, JSON.stringify(data));
       }
-      const rewards = { ...initialRewards, ...data.rewards, unlocked: reachedMilestones(totalXP(currentRun(data.memories, data.previousRunCount))) };
-      if (raw && (!data.rewards || data.rewards.unlocked?.join() !== rewards.unlocked.join())) {
-        await AsyncStorage.setItem(key, JSON.stringify({ ...data, rewards }));
-      }
-      data.rewards = rewards;
       current.current = data;
-      setJournal(data);
+      setFamily(data);
       setStatus('ready');
     } catch {
       setStatus('error');
@@ -68,13 +53,13 @@ function useJournalState() {
 
   useEffect(() => { void load(); }, []);
 
-  function update(change: (previous: Journal) => Journal) {
+  function update(change: (previous: Family) => Family) {
     const task = queue.current.then(async () => {
       const next = change(current.current);
       if (next === current.current) return;
       await AsyncStorage.setItem(key, JSON.stringify(next));
       current.current = next;
-      setJournal(next);
+      setFamily(next);
     });
     queue.current = task.catch(() => {});
     return task;
@@ -83,7 +68,7 @@ function useJournalState() {
   async function addMemory(memory: Omit<Memory, 'xp'>) {
     let earned = 0;
     let unlocked: Milestone[] = [];
-    await update(previous => {
+    await update(state => replacePlayer(state, family.activeId, previous => {
       const duplicate = previous.memories.find(item => item.id === memory.id);
       if (duplicate) {
         earned = duplicate.xp;
@@ -102,22 +87,32 @@ function useJournalState() {
         memories: [{ ...memory, xp: earned }, ...previous.memories],
         rewards: { ...previous.rewards, unlocked: reached },
       };
-    });
+    }));
     return { earned, unlocked };
   }
 
+  const selected = family.players.find(player => player.id === family.activeId);
+  const journal = { ...(selected ?? emptyProgress), profile: selected?.profile, language: family.language };
   const activeMemories = currentRun(journal.memories, journal.previousRunCount);
   return {
     journal, status, load, activeMemories,
+    players: family.players, activePlayerId: family.activeId,
     xp: totalXP(activeMemories),
-    resetProgress: () => update(previous => ({
-      ...previous, previousRunCount: previous.memories.length, rewards: initialRewards,
-    })),
-    setProfile: (profile: Profile) => update(previous => ({ ...previous, profile })),
+    resetProgress: () => update(state => replacePlayer(state, family.activeId, player => ({
+      ...player, previousRunCount: player.memories.length, rewards: initialRewards,
+    }))),
+    addPlayer: (profile: Profile) => update(previous => {
+      const id = randomUUID();
+      return { ...previous, activeId: id, players: [...previous.players, { ...emptyProgress, profile, id }] };
+    }),
+    selectPlayer: (id: string) => update(previous => {
+      if (!previous.players.some(player => player.id === id)) throw new Error('Player is unavailable');
+      return id === previous.activeId ? previous : { ...previous, activeId: id };
+    }),
     setLanguage: (language: Language) => update(previous => ({ ...previous, language })),
     addMemory,
     updateRewards: (change: (rewards: Rewards) => Rewards) =>
-      update(previous => ({ ...previous, rewards: change(previous.rewards) })),
+      update(state => replacePlayer(state, family.activeId, player => ({ ...player, rewards: change(player.rewards) }))),
   };
 }
 

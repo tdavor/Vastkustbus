@@ -3,7 +3,7 @@ export const appName = 'Västkustbus';
 export const copy = {
   en: {
     updateTitle: 'Update available', updateMessage: 'Version {version} is available on GitHub.',
-    viewUpdate: 'View updates',
+    downloadUpdate: 'Download update', updateError: 'Could not verify, download, or open the update. Please try again after reopening the app.',
     gameSettings: 'Settings', resetProgress: 'Reset game to 0 XP',
     resetConfirm: 'Reset game progress?', resetDetails: 'XP, completed missions and rewards will start over. Your profile and Memory Book photos are kept.',
     resetDone: 'Game reset to 0 XP.',
@@ -29,7 +29,7 @@ export const copy = {
   },
   sv: {
     updateTitle: 'Uppdatering tillgänglig', updateMessage: 'Version {version} finns på GitHub.',
-    viewUpdate: 'Visa uppdateringar',
+    downloadUpdate: 'Ladda ner uppdatering', updateError: 'Det gick inte att verifiera, ladda ner eller öppna uppdateringen. Öppna appen igen för att försöka på nytt.',
     gameSettings: 'Inställningar', resetProgress: 'Nollställ spelet',
     resetConfirm: 'Nollställa spelet?', resetDetails: 'XP, avklarade uppdrag och belöningar börjar om från noll. Profilen och bilderna i minnesboken sparas.',
     resetDone: 'Spelet har nollställts till 0 XP.',

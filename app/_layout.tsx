@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Image, Text, useWindowDimensions, View } from 'react-native';
 import { JournalProvider, useJournal } from '../src/store';
-import { useStartupUpdate } from '../src/updates';
+import { UpdatesProvider, useStartupUpdate } from '../src/updates';
 import { appName, copy } from '../src/text';
 import { Button, colors, Page, styles } from '../src/ui';
 
@@ -58,5 +58,5 @@ function Routes() {
 }
 
 export default function RootLayout() {
-  return <JournalProvider><StatusBar style="dark" /><Routes /></JournalProvider>;
+  return <JournalProvider><UpdatesProvider><StatusBar style="dark" /><Routes /></UpdatesProvider></JournalProvider>;
 }

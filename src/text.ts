@@ -3,7 +3,11 @@ export const appName = 'Västkustbus';
 export const copy = {
   en: {
     updateTitle: 'Update available', updateMessage: 'Version {version} is available on GitHub.',
-    downloadUpdate: 'Download update', updateError: 'Could not verify, download, or open the update. Please try again after reopening the app.',
+    downloadUpdate: 'Download update', updateError: 'Could not check, verify, download, or open the update. Check your connection and try again.',
+    checkUpdate: 'Check for updates', checkingUpdate: 'Checking for updates…', updateCurrent: 'You have the latest available version.',
+    updatePending: 'A newer version is being prepared. Its Android installer is not available yet. Try again later.',
+    downloadingUpdate: 'Downloading update', verifyingUpdate: 'Verifying update…', installingUpdate: 'Opening Android installer…',
+    updateCancelled: 'Download cancelled.', updateAndroidOnly: 'App updates are available on Android.',
     addPlayer: 'Add child', choosePlayer: 'Who is playing?', about: 'About', appVersion: 'Version', author: 'Author',
     feedback: 'Send us your feedback and suggestions by email.', linkError: 'Could not open the link.',
     gameSettings: 'Settings', resetProgress: 'Reset entire game',
@@ -31,7 +35,11 @@ export const copy = {
   },
   sv: {
     updateTitle: 'Uppdatering tillgänglig', updateMessage: 'Version {version} finns på GitHub.',
-    downloadUpdate: 'Ladda ner uppdatering', updateError: 'Det gick inte att verifiera, ladda ner eller öppna uppdateringen. Öppna appen igen för att försöka på nytt.',
+    downloadUpdate: 'Ladda ner uppdatering', updateError: 'Det gick inte att söka efter, verifiera, ladda ner eller öppna uppdateringen. Kontrollera anslutningen och försök igen.',
+    checkUpdate: 'Sök efter uppdatering', checkingUpdate: 'Söker efter uppdatering…', updateCurrent: 'Du har den senaste tillgängliga versionen.',
+    updatePending: 'En ny version förbereds. Installationsfilen för Android finns inte ännu. Försök igen senare.',
+    downloadingUpdate: 'Laddar ner uppdatering', verifyingUpdate: 'Verifierar uppdatering…', installingUpdate: 'Öppnar Androids installation…',
+    updateCancelled: 'Nedladdningen avbröts.', updateAndroidOnly: 'Appuppdateringar är tillgängliga på Android.',
     addPlayer: 'Lägg till barn', choosePlayer: 'Vem spelar?', about: 'Om spelet', appVersion: 'Version', author: 'Skapare',
     feedback: 'Mejla oss gärna med synpunkter och förslag.', linkError: 'Det gick inte att öppna länken.',
     gameSettings: 'Inställningar', resetProgress: 'Nollställ hela spelet',

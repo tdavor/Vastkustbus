@@ -1,4 +1,5 @@
 import type { Avatar, Language } from './missions';
+import { landmarks, landmarkXP, restoreLandmarkVisits } from './landmarks';
 import { currentRun, initialRewards, reachedMilestones, totalXP, type Rewards } from './rewards';
 
 export type Coordinates = { latitude: number; longitude: number };
@@ -13,7 +14,7 @@ export type Memory = {
   coordinates?: Coordinates;
 };
 export type Profile = { name: string; avatar: Avatar };
-type Progress = { memories: Memory[]; previousRunCount?: number; rewards: Rewards };
+type Progress = { memories: Memory[]; previousRunCount?: number; rewards: Rewards; visitedLandmarks?: string[] };
 export type Player = Progress & { id: string; profile: Profile };
 export type Family = { version: 2; language: Language; activeId?: string; players: Player[] };
 type LegacyJournal = Progress & { version: 1; language: Language; profile?: Profile };
@@ -35,10 +36,11 @@ export function restoreFamily(data: LegacyJournal | Family): Family {
     activeId: data.players.find(player => player.id === data.activeId)?.id ?? data.players[0]?.id,
     players: data.players.map(player => ({
       ...player,
+      visitedLandmarks: restoreLandmarkVisits(player.visitedLandmarks),
       rewards: {
         ...initialRewards,
         ...player.rewards,
-        unlocked: reachedMilestones(totalXP(currentRun(player.memories, player.previousRunCount))),
+        unlocked: reachedMilestones(totalXP(currentRun(player.memories, player.previousRunCount)) + landmarkXP(player.visitedLandmarks)),
       },
     })),
   };
@@ -50,4 +52,17 @@ export function replacePlayer(family: Family, id: string | undefined, change: (p
   const next = change(player);
   if (next === player) return family;
   return { ...family, players: family.players.map(item => item === player ? next : item) };
+}
+
+export function visitLandmark(player: Player, landmarkId: string): Player {
+  if (!landmarks.some(place => place.id === landmarkId)) throw new Error('Unknown landmark');
+  const visits = restoreLandmarkVisits(player.visitedLandmarks);
+  if (visits.includes(landmarkId)) return player;
+  const visitedLandmarks = [...visits, landmarkId];
+  const xp = totalXP(currentRun(player.memories, player.previousRunCount)) + landmarkXP(visitedLandmarks);
+  return {
+    ...player,
+    visitedLandmarks,
+    rewards: { ...player.rewards, unlocked: reachedMilestones(xp) },
+  };
 }

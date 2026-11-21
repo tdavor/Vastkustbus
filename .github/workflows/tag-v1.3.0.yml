@@ -1,0 +1,14 @@
+name: Create v1.3.0 tag
+on:
+  push:
+    branches: [release-tag/v1.3.0]
+jobs:
+  tag:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Create v1.3.0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref=refs/tags/v1.3.0 -f sha=c1c965166a92c3db71d6b582896cc3a173bebfba --jq .ref

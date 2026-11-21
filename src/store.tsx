@@ -4,7 +4,8 @@ import { Directory, File, Paths } from 'expo-file-system';
 import { getLocales } from 'expo-localization';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { missions, type Language } from './missions';
-import { emptyProgress, replacePlayer, restoreFamily, type Family, type Memory, type Profile } from './journal';
+import { emptyProgress, replacePlayer, restoreFamily, visitLandmark, type Family, type Memory, type Profile } from './journal';
+import { landmarkCheckInXP, landmarkXP } from './landmarks';
 export type { Coordinates, Memory, Place } from './journal';
 import { currentRun, missionXP, reachedMilestones, totalXP, type Milestone, type Rewards } from './rewards';
 
@@ -114,7 +115,7 @@ function useJournalState() {
       }
       const active = currentRun(previous.memories, previous.previousRunCount);
       earned = missionXP(active, mission.id, mission.xp);
-      const reached = reachedMilestones(totalXP(active) + earned);
+      const reached = reachedMilestones(totalXP(active) + landmarkXP(previous.visitedLandmarks) + earned);
       unlocked = reached.filter(mark => !previous.rewards.unlocked.includes(mark));
       return {
         ...previous,
@@ -131,7 +132,7 @@ function useJournalState() {
   return {
     journal, status, load, activeMemories,
     players: family.players, activePlayerId: family.activeId,
-    xp: totalXP(activeMemories),
+    xp: totalXP(activeMemories) + landmarkXP(journal.visitedLandmarks),
     resetGame,
     addPlayer: (profile: Profile) => update(previous => {
       const id = randomUUID();
@@ -143,6 +144,15 @@ function useJournalState() {
     }),
     setLanguage: (language: Language) => update(previous => ({ ...previous, language })),
     addMemory,
+    checkInLandmark: async (landmarkId: string) => {
+      let earned = 0;
+      await update(state => replacePlayer(state, family.activeId, player => {
+        const next = visitLandmark(player, landmarkId);
+        if (next !== player) earned = landmarkCheckInXP;
+        return next;
+      }));
+      return earned;
+    },
     updateRewards: (change: (rewards: Rewards) => Rewards) =>
       update(state => replacePlayer(state, family.activeId, player => ({ ...player, rewards: change(player.rewards) }))),
   };

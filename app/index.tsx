@@ -180,6 +180,7 @@ export default function Home() {
         <Button title={r.chest} icon="gift-outline" tone="yellow" onPress={() => router.push('/rewards')} />
         <Button title={t.start} icon="compass-outline" tone="yellow" onPress={() => router.push('/mission')} />
         <Button title={t.book} icon="book-outline" onPress={() => router.push('/book')} />
+        <Button title="Upptäck Göteborg" icon="compass-outline" tone="quiet" onPress={() => router.push('/discover-gothenburg')} />
       </> : <>
         <Text style={styles.title}>{t.welcome}</Text>
         <Text style={styles.body}>{t.intro}</Text>

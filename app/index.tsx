@@ -7,6 +7,7 @@ import { avatars, levelFor, type Avatar } from '../src/missions';
 import { useJournal } from '../src/store';
 import { appName, copy } from '../src/text';
 import { milestones, rewardsCopy } from '../src/rewards';
+import { useUpdates } from '../src/updates';
 import { Animal, ExplorerAvatar, Button, Chip, colors, Page, styles } from '../src/ui';
 
 const authorEmail = 'tdavor@gmail.com';
@@ -15,6 +16,7 @@ const supportUrl = 'https://buymeacoffee.com/wjkrddbhyx';
 export default function Home() {
   const { journal, xp, setLanguage, addPlayer, selectPlayer, players, activePlayerId, resetGame } = useJournal();
   const { language, profile } = journal;
+  const updates = useUpdates();
   const t = copy[language];
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState<Avatar>('moose');
@@ -149,6 +151,11 @@ export default function Home() {
               {settings === 'about' && <>
                 <Text accessibilityRole="header" style={styles.heading}>{t.about} · {appName}</Text>
                 <Text style={styles.body}>{t.appVersion} {Constants.expoConfig?.version ?? '–'}</Text>
+                <Button title={updates.phase === 'checking' ? t.checkingUpdate : t.checkUpdate}
+                  icon="cloud-download-outline" tone="quiet" disabled={updates.phase !== 'idle'}
+                  onPress={() => { void updates.check(language, true); }} />
+                {updates.feedback && <Text accessibilityLiveRegion="polite"
+                  style={updates.feedback === 'updateError' ? styles.error : styles.small}>{t[updates.feedback]}</Text>}
                 <Text style={styles.body}>{t.author} · {authorEmail}</Text>
                 <Text style={styles.body}>{t.feedback}</Text>
                 <Button title={authorEmail} icon="mail-outline" tone="quiet" onPress={() => openLink(`mailto:${authorEmail}`)} />

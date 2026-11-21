@@ -23,6 +23,7 @@ export function newerVersion(installed: string, response: unknown): string | und
 
 const repo = 'tdavor/Vastkustbus';
 export const latestReleaseUrl = `https://api.github.com/repos/${repo}/releases/latest`;
+export const latestTagsUrl = `https://api.github.com/repos/${repo}/tags?per_page=100`;
 
 export function availableAPK(installed: string, response: unknown) {
   if (!response || typeof response !== 'object') return;

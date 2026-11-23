@@ -1,0 +1,26 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+group = 'se.vastkustbus'
+version = '1.0.0'
+android {
+  namespace 'se.vastkustbus.drawings'
+  defaultConfig {
+    minSdkVersion 24
+    versionCode 1
+    versionName '1.0.0'
+  }
+}
+dependencies {
+  implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.23.2'
+  implementation 'androidx.exifinterface:exifinterface:1.3.7'
+  testImplementation 'junit:junit:4.13.2'
+}
+tasks.named('preBuild').configure {
+  doFirst {
+    if (!file('src/main/assets/models/informative-style1.onnx').exists()) {
+      throw new GradleException('Missing drawing model. Run python scripts/prepare-drawing-model.py from the app root before building.')
+    }
+  }
+}

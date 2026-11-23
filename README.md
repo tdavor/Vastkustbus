@@ -180,3 +180,46 @@ The app comes pre-loaded with **20 Gothenburg-inspired preschool missions**, div
 
 ## 📄 License
 This project is open-source and available under the [MIT License](LICENSE).
+
+## Offline coloring model (Android 1.5.0)
+
+The album uses **Informative Drawings, style 1** by Caroline Chan et al.
+Photos and resulting PNGs stay in private app storage. The original photo is never
+replaced. Inference runs off the JS/UI thread through a local Expo module and ONNX
+Runtime Android 1.23.2 (CPU, two threads). The model is packaged in the APK; no
+runtime model download or account is needed. Expo Go does not include this module;
+use a standalone or development Android build.
+
+The 0–100 detail slider is **post-processing**, not a model parameter. At 100 it
+preserves the original model pixels. Lower values fade weak gray lines through a
+white-point adjustment; they do not semantically remove clothing patterns or
+background objects. Adjusting the slider reuses the cached model output. Printing
+and sharing always use the currently displayed, fully loaded PNG.
+
+### Build the model before Android prebuild
+
+Use Python 3.12. The export downloads the author's style-1 weights from a pinned
+Hugging Face revision and checks SHA-256 before loading with `weights_only=True`.
+Weights and generated ONNX are ignored by git. The build fails explicitly if the
+model asset is missing; there is no fallback to the former edge filter.
+
+```sh
+python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.15.0
+python -m pip install onnx==1.20.1 onnxruntime==1.23.2
+python scripts/prepare-drawing-model.py
+python scripts/check-drawing-model.py
+npm ci
+npx expo prebuild --platform android --no-install
+cd android
+./gradlew :informative-drawings:testReleaseUnitTest :app:assembleRelease
+```
+
+The export check compares portrait and landscape tensor sizes with the original
+PyTorch generator. CI also runs the Kotlin detail-control tests and builds/signs a
+standalone APK. Inference quality, latency, print dialog and low-memory behavior
+should additionally be checked on a physical Android device before release.
+
+Upstream: https://github.com/carolineec/informative-drawings
+Author demo/weights: https://huggingface.co/spaces/carolineec/informativedrawings
+MIT copyright/license notices are retained in `scripts/drawings/LICENSE.txt` and
+inside the Android asset bundle. ONNX Runtime is distributed under its MIT license.

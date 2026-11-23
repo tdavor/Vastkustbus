@@ -1,6 +1,6 @@
 {
   "name": "vastkustbus",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
@@ -22,6 +22,7 @@
     "expo-localization": "~17.0.9",
     "expo-location": "~19.0.8",
     "expo-network": "~8.0.8",
+    "expo-print": "~15.0.8",
     "expo-router": "~6.0.24",
     "expo-sharing": "~14.0.8",
     "expo-splash-screen": "~31.0.13",
@@ -32,7 +33,8 @@
     "react-native": "0.81.5",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
-    "react-native-view-shot": "4.0.3"
+    "react-native-view-shot": "4.0.3",
+    "react-native-webview": "13.15.0"
   },
   "devDependencies": {
     "@types/react": "~19.1.10",

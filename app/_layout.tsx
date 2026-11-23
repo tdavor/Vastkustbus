@@ -52,6 +52,7 @@ function Routes() {
         <Stack.Screen name="discover-gothenburg" />
         <Stack.Screen name="slideshow" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="memory/[id]" />
+        <Stack.Screen name="coloring/[id]" />
       </Stack.Protected>
     </Stack>
   );

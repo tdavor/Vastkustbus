@@ -6,7 +6,8 @@ import { Text, View } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import { dateLabel, MemoryPhoto, placeLabel } from '../../src/memory';
 import { avatars, levelFor, missions } from '../../src/missions';
-import { useJournal } from '../../src/store';
+import { photoFile, useJournal } from '../../src/store';
+import { printImage } from '../../src/printing';
 import { rewardsCopy } from '../../src/rewards';
 import { appName, copy } from '../../src/text';
 import { Animal, Button, colors, Page, styles } from '../../src/ui';
@@ -22,6 +23,7 @@ export default function MemoryDetail() {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [printError, setPrintError] = useState(false);
   const [favoriteError, setFavoriteError] = useState(false);
 
   async function share() {
@@ -39,6 +41,16 @@ export default function MemoryDetail() {
       sharing.current = false;
       setBusy(false);
     }
+  }
+
+  async function printPhoto() {
+    if (!memory || !ready || sharing.current) return;
+    sharing.current = true;
+    setBusy(true);
+    setPrintError(false);
+    try { await printImage(photoFile(memory.photo).uri); }
+    catch { setPrintError(true); }
+    finally { sharing.current = false; setBusy(false); }
   }
 
   const place = memory && placeLabel(memory, language);
@@ -65,6 +77,11 @@ export default function MemoryDetail() {
         </View>
         <Button title={t.share} icon="share-social-outline" tone="yellow" disabled={!ready || busy}
           onPress={() => { void share(); }} />
+        <Button title={t.makeColoring} icon="color-palette-outline" disabled={!ready || busy}
+          onPress={() => router.push({ pathname: '/coloring/[id]', params: { id: memory.id } })} />
+        <Button title={t.printPhoto} icon="print-outline" tone="quiet" disabled={!ready || busy}
+          onPress={() => { void printPhoto(); }} />
+        {printError && <Text accessibilityRole="alert" style={styles.error}>{t.printError}</Text>}
         {rewards.unlocked.includes(1500) && <Button title={rewards.favorite === memory.id ? r.chosen : r.favorite}
           icon={rewards.favorite === memory.id ? 'star' : 'star-outline'} tone="quiet" disabled={rewards.favorite === memory.id}
           onPress={() => {

@@ -6,6 +6,7 @@ import { Alert, Image, Linking, Modal, Pressable, ScrollView, Text, TextInput, V
 import { avatars, levelFor, type Avatar } from '../src/missions';
 import { useJournal } from '../src/store';
 import { appName, copy } from '../src/text';
+import { drawingLicense } from '../src/drawing-license';
 import { milestones, rewardsCopy } from '../src/rewards';
 import { useUpdates } from '../src/updates';
 import { Animal, ExplorerAvatar, Button, Chip, colors, Page, styles } from '../src/ui';
@@ -17,6 +18,7 @@ export default function Home() {
   const { journal, xp, setLanguage, addPlayer, selectPlayer, players, activePlayerId, resetGame } = useJournal();
   const { language, profile } = journal;
   const updates = useUpdates();
+  const [showDrawingLicense, setShowDrawingLicense] = useState(false);
   const t = copy[language];
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState<Avatar>('moose');
@@ -160,6 +162,10 @@ export default function Home() {
                 <Text style={styles.body}>{t.feedback}</Text>
                 <Button title={authorEmail} icon="mail-outline" tone="quiet" onPress={() => openLink(`mailto:${authorEmail}`)} />
                 <Button title="Buy me a coffee" icon="cafe-outline" tone="yellow" onPress={() => openLink(supportUrl)} />
+                <Text style={styles.small}>{t.drawingCredit}</Text>
+                <Button title={t.drawingLicense} icon="document-text-outline" tone="quiet"
+                  onPress={() => setShowDrawingLicense(previous => !previous)} />
+                {showDrawingLicense && <Text selectable style={styles.small}>{drawingLicense}</Text>}
                 {linkError && <Text accessibilityRole="alert" style={styles.error}>{t.linkError}</Text>}
               </>}
               {error && <Text accessibilityRole="alert" style={styles.error}>{t.saveError}</Text>}

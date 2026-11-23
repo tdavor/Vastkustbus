@@ -1,81 +1,50 @@
-import { File } from 'expo-file-system';
-import { useEffect, useRef, useState } from 'react';
-import WebView from 'react-native-webview';
-import { coloringHTML } from './coloring-algorithm';
+import { requireOptionalNativeModule } from 'expo-modules-core';
 import { photoFile } from './store';
 
-export type ColoringResult = { base64: string; width: number; height: number };
+type DrawingResult = { uri: string; width?: number; height?: number };
+type DrawingEngine = {
+  createDrawing: (source: string, destination: string) => Promise<DrawingResult>;
+  adjustDetail: (source: string, destination: string, detail: number) => Promise<DrawingResult>;
+};
+const engine = requireOptionalNativeModule<DrawingEngine>('InformativeDrawings');
+const pending = new Map<string, Promise<DrawingResult>>();
 
-export function coloringFile(photo: string, detailed: boolean) {
-  return photoFile('coloring-v1-' + (detailed ? 'detailed-' : 'simple-') + encodeURIComponent(photo) + '.png');
+export const drawingEngineAvailable = Boolean(engine);
+export const normalizeDetail = (value: number) => Math.max(0, Math.min(100, Math.round(value / 5) * 5));
+// New cache namespace: the former edge-filter PNGs must never be reused.
+export function coloringFile(photo: string, detail = 100) {
+  return photoFile(`informative-style1-v1-${normalizeDetail(detail)}-${encodeURIComponent(photo)}.png`);
 }
 
-export function saveColoring(photo: string, detailed: boolean, result: ColoringResult) {
-  const destination = coloringFile(photo, detailed);
-  const temporary = photoFile(destination.name + '.tmp');
-  try {
-    temporary.create({ overwrite: true });
-    temporary.write(result.base64, { encoding: 'base64' });
-    if (destination.exists) temporary.delete();
-    else temporary.move(destination);
-    return destination.uri;
-  } catch (error) {
-    if (temporary.exists) temporary.delete();
-    throw error;
-  }
+async function once(key: string, action: () => Promise<DrawingResult>) {
+  const existing = pending.get(key);
+  if (existing) return existing;
+  const task = action();
+  pending.set(key, task);
+  try { return await task; }
+  finally { if (pending.get(key) === task) pending.delete(key); }
 }
 
-export function ColoringProcessor({ source, detailed, onComplete, onError }: {
-  source: string; detailed: boolean; onComplete: (result: ColoringResult) => void; onError: () => void;
-}) {
-  const [html, setHTML] = useState<string>();
-  const callbacks = useRef({ onComplete, onError });
-  const finished = useRef(false);
-  const timeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  callbacks.current = { onComplete, onError };
+export async function createColoring(photo: string, detail: number): Promise<DrawingResult> {
+  if (!engine) throw new Error('Drawing engine needs an Android build');
+  const source = photoFile(photo);
+  if (!source.exists) throw new Error('Memory no longer exists');
+  const base = coloringFile(photo);
+  await once(base.uri, async () => {
+    if (base.exists && base.size > 0) return { uri: base.uri };
+    return engine.createDrawing(source.uri, base.uri);
+  });
+  const amount = normalizeDetail(detail);
+  if (amount === 100) return { uri: base.uri };
+  const destination = coloringFile(photo, amount);
+  return once(destination.uri, async () => {
+    if (!source.exists) throw new Error('Memory no longer exists');
+    if (destination.exists && destination.size > 0) return { uri: destination.uri };
+    return engine.adjustDetail(base.uri, destination.uri, amount);
+  });
+}
 
-  function fail() {
-    if (finished.current) return;
-    finished.current = true;
-    clearTimeout(timeout.current);
-    callbacks.current.onError();
-  }
-
-  useEffect(() => {
-    finished.current = false;
-    timeout.current = setTimeout(fail, 45000);
-    const file = new File(source);
-    if (!file.exists || file.size > 40 * 1024 * 1024) fail();
-    else void file.base64().then(data => {
-      if (!finished.current) setHTML(coloringHTML(data, detailed));
-    }).catch(fail);
-    return () => {
-      finished.current = true;
-      clearTimeout(timeout.current);
-    };
-  }, [source, detailed]);
-
-  if (!html) return null;
-  return <WebView source={{ html, baseUrl: 'about:blank' }}
-    originWhitelist={['about:blank']} javaScriptEnabled domStorageEnabled={false}
-    allowFileAccess={false} allowFileAccessFromFileURLs={false} allowUniversalAccessFromFileURLs={false}
-    setSupportMultipleWindows={false} mixedContentMode="never"
-    onShouldStartLoadWithRequest={request => request.url === 'about:blank'}
-    onError={fail} onContentProcessDidTerminate={fail} onRenderProcessGone={fail}
-    onMessage={event => {
-      if (finished.current) return;
-      try {
-        const result = JSON.parse(event.nativeEvent.data);
-        if (result.error || typeof result.image !== 'string' || result.image.length > 12 * 1024 * 1024
-          || !Number.isInteger(result.width) || result.width < 8 || result.width > 1600
-          || !Number.isInteger(result.height) || result.height < 8 || result.height > 1600) throw new Error('Invalid outline');
-        const match = /^data:image\/png;base64,([A-Za-z0-9+/=]+)$/.exec(result.image);
-        if (!match) throw new Error('Invalid outline image');
-        finished.current = true;
-        clearTimeout(timeout.current);
-        callbacks.current.onComplete({ base64: match[1], width: result.width, height: result.height });
-      } catch { fail(); }
-    }}
-    accessible={false} importantForAccessibility="no-hide-descendants" pointerEvents="none"
-    style={{ position: 'absolute', width: 1, height: 1, opacity: 0 }} />;
+export function discardColoring(photo: string, detail: number) {
+  const file = coloringFile(photo, detail);
+  if (file.exists) file.delete();
 }

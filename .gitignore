@@ -1,4 +1,9 @@
 node_modules/
 .expo/
 dist/
-android/
+/android/
+
+.model-cache/
+modules/informative-drawings/android/src/main/assets/models/*.onnx*
+__pycache__/
+*.pyc

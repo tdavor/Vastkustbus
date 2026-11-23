@@ -1,0 +1,4 @@
+# Install torch separately from https://download.pytorch.org/whl/cpu to avoid CUDA dependencies.
+torch==2.15.0
+onnx==1.20.1
+onnxruntime==1.23.2

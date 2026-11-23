@@ -1,0 +1,128 @@
+name: Release verified Västkustbus 1.4.0
+
+on:
+  push:
+    branches: ["release/v1.4.0"]
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_TAG: v1.4.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 16ebdb498013f7af082c069c373f6b7ed364c5fc
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Check signing credentials
+        if: ${{ !inputs.build_only }}
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.ANDROID_SIGNING_KEY_BASE64 }}
+          SIGNING_CERT_BASE64: ${{ secrets.ANDROID_SIGNING_CERT_BASE64 }}
+        run: |
+          if [[ -z "$SIGNING_KEY_BASE64" || -z "$SIGNING_CERT_BASE64" ]]; then
+            echo "::error::Android signing secrets are missing"
+            exit 1
+          fi
+
+      - name: Set up Android command-line tools
+        run: |
+          export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
+          mkdir -p "$ANDROID_HOME/cmdline-tools"
+          curl --fail --silent --show-error --location --retry 3 https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o "$RUNNER_TEMP/android-tools.zip"
+          unzip -q "$RUNNER_TEMP/android-tools.zip" -d "$RUNNER_TEMP/android-tools"
+          mv "$RUNNER_TEMP/android-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      - name: Build standalone APK
+        run: |
+          (set +o pipefail; yes | sdkmanager --licenses >/dev/null)
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" \
+            "ndk;27.1.12297006" "cmake;3.22.1"
+          npm ci
+          # v1.0.1 has a newer expo-font peer hoisted above the Expo SDK 54 copy.
+          if [[ -d node_modules/expo/node_modules/expo-font ]] &&
+             [[ "$(node -p "require('expo/package.json').version")" == 54.* ]]; then
+            rm -rf node_modules/expo-font
+            mv node_modules/expo/node_modules/expo-font node_modules/expo-font
+          fi
+          npm run typecheck
+          node scripts/check-coloring.cjs
+          npx expo prebuild --platform android --no-install
+          cd android
+          ./gradlew :app:assembleRelease --no-daemon --max-workers=3 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+
+      - name: Sign and verify APK
+        if: ${{ !inputs.build_only }}
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.ANDROID_SIGNING_KEY_BASE64 }}
+          SIGNING_CERT_BASE64: ${{ secrets.ANDROID_SIGNING_CERT_BASE64 }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+[.][0-9]+[.][0-9]+$ ]]
+          [[ "v$(node -p "require('./app.json').expo.version")" == "$RELEASE_TAG" ]]
+          umask 077
+          key="$RUNNER_TEMP/vastkustbus.pk8"
+          cert="$RUNNER_TEMP/vastkustbus.x509.der"
+          trap 'rm -f "$key" "$cert"' EXIT
+          printf '%s' "$SIGNING_KEY_BASE64" | base64 --decode > "$key"
+          printf '%s' "$SIGNING_CERT_BASE64" | base64 --decode > "$cert"
+          signer="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          "$signer" sign --key "$key" --cert "$cert" \
+            --out "Vastkustbus-${RELEASE_TAG}.apk" \
+            android/app/build/outputs/apk/release/app-release.apk
+          "$signer" verify --verbose --print-certs "Vastkustbus-${RELEASE_TAG}.apk"
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.build_only }}
+        with:
+          name: apk-for-external-signing
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: ${{ !inputs.build_only }}
+        with:
+          name: signed-apk
+          path: Vastkustbus-*.apk
+          if-no-files-found: error
+
+  publish:
+    if: ${{ !inputs.build_only }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: signed-apk
+      - name: Publish the signed Android update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$RELEASE_TAG" -f sha="16ebdb498013f7af082c069c373f6b7ed364c5fc"
+          fi
+          actual="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha')"
+          [[ "$actual" == "16ebdb498013f7af082c069c373f6b7ed364c5fc" ]]
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "Västkustbus $RELEASE_TAG" --notes "Nyhet: Gör foton i minnesalbumet till målarbilder direkt på telefonen. Välj enkla konturer eller fler detaljer, dela och skriv ut målarbilden eller originalfotot. Gratis och utan att skicka foton till en server. Uppdateringsknapp i Om appen. Android 1.4.0 (13)." --repo "$GITHUB_REPOSITORY"
+          fi
+          gh release upload "$RELEASE_TAG" "Vastkustbus-${RELEASE_TAG}.apk" --repo "$GITHUB_REPOSITORY"
+          gh release edit "$RELEASE_TAG" --draft=false --repo "$GITHUB_REPOSITORY"

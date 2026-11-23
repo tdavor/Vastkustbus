@@ -4,7 +4,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import { getLocales } from 'expo-localization';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { missions, type Language } from './missions';
-import { emptyProgress, replacePlayer, restoreFamily, visitLandmark, type Family, type Memory, type Profile } from './journal';
+import { emptyProgress, replacePlayer, restoreFamily, visitLandmark, editMemory, type Family, type Memory, type Profile } from './journal';
 import { landmarkCheckInXP, landmarkXP } from './landmarks';
 export type { Coordinates, Memory, Place } from './journal';
 import { currentRun, missionXP, reachedMilestones, totalXP, type Milestone, type Rewards } from './rewards';
@@ -13,6 +13,8 @@ const key = 'goteborg-explorer.journal.v1';
 const initial: Family = {
   version: 2, language: getLocales()[0]?.languageCode === 'sv' ? 'sv' : 'en', players: [],
 };
+
+export const bookDirectory = () => new Directory(Paths.document, 'family-books');
 
 const photoDirectory = () => new Directory(Paths.document, 'memories');
 export const photoFile = (name: string) => new File(photoDirectory(), name);
@@ -35,6 +37,8 @@ const pendingReset = JSON.stringify({ ...initial, resetPending: true });
 async function finishReset() {
   const photos = photoDirectory();
   if (photos.exists) photos.delete();
+  const books = bookDirectory();
+  if (books.exists) books.delete();
   await AsyncStorage.removeItem(key);
   return initial;
 }
@@ -66,9 +70,9 @@ function useJournalState() {
 
   useEffect(() => { void load(); }, []);
 
-  function enqueue(action: () => Promise<void>) {
+  function enqueue<T>(action: () => Promise<T>): Promise<T> {
     const task = queue.current.then(action);
-    queue.current = task.catch(() => {});
+    queue.current = task.then(() => {}, () => {});
     return task;
   }
 
@@ -144,6 +148,37 @@ function useJournalState() {
     }),
     setLanguage: (language: Language) => update(previous => ({ ...previous, language })),
     addMemory,
+    saveStory: (memoryId: string, story: string) =>
+      update(state => replacePlayer(state, family.activeId, player => editMemory(player, memoryId, { story }))),
+    saveArtwork: async (memoryId: string, uri: string) => {
+      const filename = `artwork-${randomUUID()}.jpg`;
+      let oldPhoto: string | undefined;
+      let copied = false;
+      try {
+        await update(state => replacePlayer(state, family.activeId, player => {
+          const memory = player.memories.find(item => item.id === memoryId);
+          if (!memory) throw new Error('Memory is unavailable');
+          oldPhoto = memory.coloredPhoto;
+          savePhoto(uri, filename);
+          copied = true;
+          return editMemory(player, memoryId, { coloredPhoto: filename });
+        }));
+      } catch (error) {
+        if (copied) { try { const file = photoFile(filename); if (file.exists) file.delete(); } catch {} }
+        throw error;
+      }
+      if (oldPhoto) { try { const file = photoFile(oldPhoto); if (file.exists) file.delete(); } catch {} }
+    },
+    saveFamilyBook: (uri: string, playerId: string, memoryIds: string[]) => enqueue(async () => {
+      if (resetInProgress.current) throw new Error('Reset is incomplete');
+      const player = current.current.players.find(item => item.id === playerId);
+      if (!player || !memoryIds.length || memoryIds.some(id => !player.memories.some(memory => memory.id === id))) throw new Error('Book memories are unavailable');
+      bookDirectory().create({ idempotent: true, intermediates: true });
+      const destination = new File(bookDirectory(), `family-book-${randomUUID()}.pdf`);
+      try { new File(uri).copy(destination); }
+      catch (error) { if (destination.exists) destination.delete(); throw error; }
+      return destination.uri;
+    }),
     checkInLandmark: async (landmarkId: string) => {
       let earned = 0;
       await update(state => replacePlayer(state, family.activeId, player => {

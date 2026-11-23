@@ -48,6 +48,8 @@ function Routes() {
       <Stack.Protected guard={Boolean(journal.profile)}>
         <Stack.Screen name="mission" />
         <Stack.Screen name="book" />
+        <Stack.Screen name="family-book" />
+        <Stack.Screen name="artwork/[id]" />
         <Stack.Screen name="rewards" />
         <Stack.Screen name="discover-gothenburg" />
         <Stack.Screen name="slideshow" options={{ presentation: 'fullScreenModal' }} />

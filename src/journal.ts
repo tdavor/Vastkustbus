@@ -12,6 +12,8 @@ export type Memory = {
   photo: string;
   place?: Place;
   coordinates?: Coordinates;
+  story?: string;
+  coloredPhoto?: string;
 };
 export type Profile = { name: string; avatar: Avatar };
 type Progress = { memories: Memory[]; previousRunCount?: number; rewards: Rewards; visitedLandmarks?: string[] };
@@ -65,4 +67,23 @@ export function visitLandmark(player: Player, landmarkId: string): Player {
     visitedLandmarks,
     rewards: { ...player.rewards, unlocked: reachedMilestones(xp) },
   };
+}
+
+export const maxStoryLength = 600;
+export type MemoryExtras = { story?: string; coloredPhoto?: string };
+
+export function editMemory(player: Player, id: string, change: MemoryExtras): Player {
+  const memory = player.memories.find(item => item.id === id);
+  if (!memory) throw new Error('Memory is unavailable');
+  const next = { ...memory };
+  if ('story' in change) {
+    if (change.story !== undefined && typeof change.story !== 'string') throw new Error('Invalid story');
+    next.story = change.story?.trim().slice(0, maxStoryLength) || undefined;
+  }
+  if ('coloredPhoto' in change) {
+    if (change.coloredPhoto !== undefined && !/^artwork-[a-zA-Z0-9-]+\.jpg$/.test(change.coloredPhoto)) throw new Error('Invalid artwork');
+    next.coloredPhoto = change.coloredPhoto;
+  }
+  if (next.story === memory.story && next.coloredPhoto === memory.coloredPhoto) return player;
+  return { ...player, memories: player.memories.map(item => item === memory ? next : item) };
 }

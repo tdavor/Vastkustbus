@@ -123,6 +123,8 @@ export default function ColoringPage() {
           onPress={() => { void output(true); }} />
         <Button title={t.shareColoring} icon="share-social-outline" disabled={!ready || processing || pendingAdjustment || operation}
           onPress={() => { void output(false); }} />
+        <Button title={t.takeArtwork} icon="camera-outline" tone="quiet" disabled={operation || processing}
+          onPress={() => router.push({ pathname: '/artwork/[id]', params: { id: memory.id } })} />
         <Text style={styles.small}>{t.drawingCredit}</Text>
       </>}
     </> : <Text style={styles.body}>{t.missing}</Text>}

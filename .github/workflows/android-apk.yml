@@ -1,6 +1,8 @@
 name: Build and publish Android APK
 
 on:
+  push:
+    tags: ["v*"]
   workflow_dispatch:
     inputs:
       build_only:
@@ -10,11 +12,13 @@ on:
       tag:
         description: Existing GitHub release tag
         required: true
-        default: v1.0.1
         type: string
 
 permissions:
   contents: read
+
+env:
+  RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
 
 jobs:
   build:
@@ -22,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: refs/tags/${{ inputs.tag }}
+          ref: refs/tags/${{ env.RELEASE_TAG }}
           persist-credentials: false
 
       - uses: actions/setup-node@v4
@@ -79,7 +83,6 @@ jobs:
         env:
           SIGNING_KEY_BASE64: ${{ secrets.ANDROID_SIGNING_KEY_BASE64 }}
           SIGNING_CERT_BASE64: ${{ secrets.ANDROID_SIGNING_CERT_BASE64 }}
-          RELEASE_TAG: ${{ inputs.tag }}
         run: |
           [[ "$RELEASE_TAG" =~ ^v[0-9]+[.][0-9]+[.][0-9]+$ ]]
           [[ "v$(node -p "require('./app.json').expo.version")" == "$RELEASE_TAG" ]]
@@ -118,8 +121,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: signed-apk
-      - name: Attach APK to existing release
+      - name: Publish the signed Android update
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ inputs.tag }}
-        run: gh release upload "$RELEASE_TAG" "Vastkustbus-${RELEASE_TAG}.apk" --repo "$GITHUB_REPOSITORY"
+        run: |
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "Västkustbus $RELEASE_TAG" --notes "Android-uppdatering för Västkustbus." --repo "$GITHUB_REPOSITORY"
+          fi
+          gh release upload "$RELEASE_TAG" "Vastkustbus-${RELEASE_TAG}.apk" --repo "$GITHUB_REPOSITORY"
+          gh release edit "$RELEASE_TAG" --draft=false --repo "$GITHUB_REPOSITORY"

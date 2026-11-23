@@ -6,7 +6,11 @@ group = 'se.vastkustbus'
 version = '1.0.0'
 android {
   namespace 'se.vastkustbus.drawings'
-  defaultConfig { minSdkVersion 24 }
+  defaultConfig {
+    minSdkVersion 24
+    versionCode 1
+    versionName '1.0.0'
+  }
 }
 dependencies {
   implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.23.2'

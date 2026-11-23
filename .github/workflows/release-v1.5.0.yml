@@ -1,0 +1,48 @@
+name: Publish verified Västkustbus 1.5.0
+on:
+  push:
+    branches: ["release/v1.5.0"]
+permissions:
+  contents: write
+  actions: read
+env:
+  RELEASE_TAG: v1.5.0
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify the tested source and signed artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          source_sha="2d9544200e504572c7e674c428822ae8547e77c2"
+          release_sha="b2805163d40bbdedc722c9c9574f33904f88a6bb"
+          source_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$source_sha" --jq '.tree.sha')"
+          release_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$release_sha" --jq '.tree.sha')"
+          [[ "$source_tree" == "$release_tree" ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/45272271924" > run.json
+          jq -e --arg sha "$source_sha" '.conclusion == "success" and .head_sha == $sha' run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14865743214" > artifact.json
+          jq -e --arg sha "$source_sha" '.name == "signed-apk" and .expired == false and .workflow_run.head_sha == $sha' artifact.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14865743214/zip" > signed-apk.zip
+          echo "29cb5a6941cc8a35aa098feca58290b62625ba92c841cbd2af2b4ae58a20110b  signed-apk.zip" | sha256sum --check
+          unzip -j signed-apk.zip "Vastkustbus-v1.5.0.apk"
+          unzip -Z1 "Vastkustbus-v1.5.0.apk" | grep -Fx 'assets/models/informative-style1.onnx'
+          sha256sum "Vastkustbus-v1.5.0.apk"
+      - name: Create the exact main tag and publish Android update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_sha="b2805163d40bbdedc722c9c9574f33904f88a6bb"
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$RELEASE_TAG" -f sha="$release_sha"
+          fi
+          actual="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha')"
+          [[ "$actual" == "$release_sha" ]]
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "Västkustbus $RELEASE_TAG" --notes "Nyhet: Informative Drawings skapar målarbilder direkt på telefonen, utan att skicka foton till en server. Reglaget Detaljnivå tonar bort svaga linjer; 100 % behåller hela modellens teckning. Skriv ut och dela den valda bilden. Android 1.5.0 (14)." --repo "$GITHUB_REPOSITORY"
+          fi
+          gh release upload "$RELEASE_TAG" "Vastkustbus-v1.5.0.apk" --repo "$GITHUB_REPOSITORY"
+          gh release edit "$RELEASE_TAG" --draft=false --repo "$GITHUB_REPOSITORY"

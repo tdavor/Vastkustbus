@@ -1,6 +1,6 @@
 # Lär känna din stad
 
-Home → country → city → four places. The guide is Swedish, like the original Göteborg mini-guide. Each place has a short read-aloud description, an outdoor mini-challenge, a map link and a one-time 50 XP check-in per child.
+Home → country → city → four places. The entire guide follows the app’s Swedish/English setting, including descriptions, challenges, counters, map actions, stamps and errors. English landmark text is exhaustive by ID in `src/city-copy.ts`; new cities must also supply an `en` name and description. Each place has a short read-aloud description, an outdoor mini-challenge, a map link and a one-time 50 XP check-in per child.
 
 `src/cities.ts` is the catalogue: add a country to `countries`, add its cities with matching `countryId`, then add stable landmark IDs in `src/landmarks.ts` and reference them in `landmarkIds`. No navigation screen changes are needed for another country. Keep IDs globally unique and stable.
 

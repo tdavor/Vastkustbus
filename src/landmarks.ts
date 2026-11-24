@@ -64,7 +64,9 @@ export const landmarks = [
 // Keep their saved IDs valid so an upgrade never removes earned XP or rewards.
 const previousLandmarkIds = ['alvsborgsbron', 'feskekorka', 'liseberg', 'sodra-skargarden'] as const;
 
-export type Landmark = typeof landmarks[number];
+export type Landmark = Omit<typeof landmarks[number], 'name' | 'neighborhood' | 'fact' | 'challenge'> & {
+  name: string; neighborhood: string; fact: string; challenge: string;
+};
 
 export function restoreLandmarkVisits(value: unknown): string[] {
   return Array.isArray(value)

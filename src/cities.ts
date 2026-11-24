@@ -15,7 +15,7 @@ export const countries = [
 export const cities: readonly City[] = [
   {
     id: 'gothenburg', countryId: 'sweden', name: 'Göteborg',
-    description: 'Välkommen till staden vid havet! Här väntar ett hus som liknar ett läppstift, djur i en park en guldkrona högt på ett torn och sagornas havskung.',
+    description: 'Välkommen till staden vid havet! Här väntar ett hus som liknar ett läppstift, djur i en park, en guldkrona högt på ett torn och sagornas havskung.',
     icon: 'boat-outline', color: '#DDF3F6',
     landmarkIds: ['lappstiftet', 'slottsskogen', 'haga-skansen', 'poseidon'],
   },

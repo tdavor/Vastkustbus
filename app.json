@@ -1,15 +1,15 @@
 {
   "expo": {
     "name": "MinneTrail",
-    "slug": "goteborg-explorer",
-    "version": "1.7.3",
-    "scheme": "goteborgexplorer",
+    "slug": "minnetrail",
+    "version": "1.7.4",
+    "scheme": "minnetrail",
     "platforms": ["android"],
     "userInterfaceStyle": "light",
     "icon": "./assets/launcher.png",
     "android": {
-      "package": "se.goteborgexplorer.app",
-      "versionCode": 19,
+      "package": "se.minnetrail.app",
+      "versionCode": 20,
       "adaptiveIcon": {
         "foregroundImage": "./assets/launcher.png",
         "backgroundColor": "#FEFAE0"

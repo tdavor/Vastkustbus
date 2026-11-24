@@ -1,0 +1,21 @@
+name: Enable MinneTrail privacy policy website
+on:
+  push:
+    branches: ["docs/minnetrail-privacy"]
+permissions:
+  contents: read
+  pages: write
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable public privacy policy page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh api "repos/$GITHUB_REPOSITORY/pages" > pages.json 2>/dev/null; then
+            jq '{html_url,source,build_type}' pages.json
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/pages" -f build_type=legacy -f 'source[branch]=docs/minnetrail-privacy' -f 'source[path]=/docs'
+          fi

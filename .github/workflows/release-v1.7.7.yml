@@ -1,0 +1,52 @@
+name: Publish verified MinneTrail 1.7.7
+on:
+  push:
+    branches: ["release/v1.7.7"]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Verify the tested source and exact release tree
+        run: |
+          set -euo pipefail
+          source_sha="da4dafc2ef5bf0a3a561a970d930f70d6ae47d7a"
+          release_sha="e2e958dcb6bf14517faff1463345be157f66c534"
+          source_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$source_sha" --jq '.tree.sha')"
+          release_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$release_sha" --jq '.tree.sha')"
+          [[ "$source_tree" == "$release_tree" ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/45477160027" > run.json
+          jq -e --arg sha "$source_sha" '.conclusion == "success" and .head_sha == $sha' run.json
+      - name: Download and verify signed distribution artifacts
+        run: |
+          set -euo pipefail
+          source_sha="da4dafc2ef5bf0a3a561a970d930f70d6ae47d7a"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14959682939" > apk.json
+          jq -e --arg sha "$source_sha" '.name == "signed-apk-github" and .expired == false and .workflow_run.head_sha == $sha' apk.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14959682939/zip" > apk.zip
+          echo "9137a4f393828933c77b6739cd2d2b7a74ab23d6305bd97bf1a74f5e8f84c03a  apk.zip" | sha256sum --check
+          unzip -j apk.zip "Vastkustbus-v1.7.7.apk"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14961790616" > aab.json
+          jq -e --arg sha "$source_sha" '.name == "signed-google-play-bundle" and .expired == false and .workflow_run.head_sha == $sha' aab.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14961790616/zip" > aab.zip
+          echo "1c8783b11f090c4afe767cb435b7f9496e7d90c898680f267ecd54d3ebf2573b  aab.zip" | sha256sum --check
+          unzip -j aab.zip
+          sha256sum --check MinneTrail-v1.7.7.aab.sha256
+          sha256sum Vastkustbus-v1.7.7.apk MinneTrail-v1.7.7.aab > SHA256SUMS.txt
+      - name: Tag the merged source and publish the release
+        run: |
+          set -euo pipefail
+          tag="v1.7.7"
+          release_sha="e2e958dcb6bf14517faff1463345be157f66c534"
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$tag" -f sha="$release_sha"
+          fi
+          actual="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.sha')"
+          [[ "$actual" == "$release_sha" ]]
+          gh release create "$tag" --verify-tag --draft --title "MinneTrail 1.7.7 – Svenska / English" --notes "SV: Stadsguiden följer nu appens svenska eller engelska språkval. Alla knappar, lands- och stadsbeskrivningar, åtta platsberättelser och mini-utmaningar, kartlänkar, räknare, besöksstämplar och felmeddelanden är översatta. Tidigare besök, XP och belöningar bevaras. EN: The city guide now follows your Swedish or English language setting. All buttons, country and city descriptions, eight landmark stories and mini-challenges, map links, counters, visited stamps and errors are translated. Existing visits, XP and rewards are preserved. APK: GitHub edition. AAB: Google Play edition. Version 1.7.7 (23), se.minnetrail.app. Automated builds, signing and bilingual screen checks passed; physical device testing is still needed." --repo "$GITHUB_REPOSITORY"
+          gh release upload "$tag" Vastkustbus-v1.7.7.apk MinneTrail-v1.7.7.aab MinneTrail-v1.7.7.aab.sha256 SHA256SUMS.txt --repo "$GITHUB_REPOSITORY"
+          gh release edit "$tag" --draft=false --latest --repo "$GITHUB_REPOSITORY"

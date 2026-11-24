@@ -19,6 +19,7 @@ export default function MemoryBook() {
         disabled={!memories.length} tone="yellow" onPress={() => router.push('/slideshow')} />}
       {!!memories.length && <Button title={t.familyBook} icon="book-outline" tone="yellow"
         onPress={() => router.push('/family-book')} />}
+      <Button title={t.seasonPlaces} icon="leaf-outline" tone="quiet" onPress={() => router.push('/seasonal-places')} />
       {!sorted.length ? <View style={styles.card}><Text style={styles.body}>{t.empty}</Text></View> : <>
         <Text style={styles.small}>{t.archiveSubtitle}</Text>
         {sorted.map(memory => (

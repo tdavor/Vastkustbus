@@ -10,7 +10,7 @@ import { photoFile, type Memory } from './store';
 
 export class BookCancelled extends Error {}
 
-async function inlinePhoto(uri: string, active: () => boolean, drawing = false) {
+export async function inlineBookPhoto(uri: string, active: () => boolean, drawing = false) {
   if (drawing) {
     const data = await new File(uri).base64();
     if (!active()) throw new BookCancelled();
@@ -48,14 +48,14 @@ export async function generateFamilyBook(options: {
       title: missions.find(item => item.id === memory.missionId)?.title[language] ?? '',
       date: dateLabel(memory, language), place: placeLabel(memory, language),
     };
-    pages.push({ ...common, story: memory.story, kind: 'photo', image: await inlinePhoto(photoFile(memory.photo).uri, active) });
+    pages.push({ ...common, story: memory.story, kind: 'photo', image: await inlineBookPhoto(photoFile(memory.photo).uri, active) });
     if (options.drawings) {
       const drawing = await createColoring(memory.photo, 100);
       if (!active()) throw new BookCancelled();
-      pages.push({ ...common, kind: 'drawing', image: await inlinePhoto(drawing.uri, active, true) });
+      pages.push({ ...common, kind: 'drawing', image: await inlineBookPhoto(drawing.uri, active, true) });
     }
     if (options.artwork && memory.coloredPhoto) {
-      pages.push({ ...common, kind: 'artwork', image: await inlinePhoto(photoFile(memory.coloredPhoto).uri, active) });
+      pages.push({ ...common, kind: 'artwork', image: await inlineBookPhoto(photoFile(memory.coloredPhoto).uri, active) });
     }
   }
   if (!active()) throw new BookCancelled();

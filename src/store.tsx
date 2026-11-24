@@ -1,3 +1,4 @@
+import { addSeasonPlace, addSeasonVisit, removeSeasonPlace, removeSeasonVisit } from './seasons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { randomUUID } from 'expo-crypto';
 import { Directory, File, Paths } from 'expo-file-system';
@@ -148,6 +149,52 @@ function useJournalState() {
     }),
     setLanguage: (language: Language) => update(previous => ({ ...previous, language })),
     addMemory,
+    addSeasonalPlace: async (name: string, frameHint: string) => {
+      const id = randomUUID();
+      await update(state => replacePlayer(state, family.activeId, player => addSeasonPlace(player, id, name, frameHint)));
+      return id;
+    },
+    addSeasonalVisit: async (placeId: string, uri: string, date: string, note: string) => {
+      const id = randomUUID();
+      const filename = `season-${id}.jpg`;
+      let copied = false;
+      try {
+        await update(state => replacePlayer(state, family.activeId, player => {
+          const next = addSeasonVisit(player, placeId, { id, date, note, photo: filename });
+          savePhoto(uri, filename); copied = true;
+          return next;
+        }));
+      } catch (error) {
+        if (copied) { try { const file = photoFile(filename); if (file.exists) file.delete(); } catch {} }
+        throw error;
+      }
+    },
+    deleteSeasonalPlace: async (placeId: string) => {
+      let filenames: string[] = [];
+      await update(state => replacePlayer(state, family.activeId, player => {
+        filenames = player.seasonalPlaces?.find(place => place.id === placeId)?.visits.map(visit => visit.photo) ?? [];
+        return removeSeasonPlace(player, placeId);
+      }));
+      for (const name of filenames) { try { const file = photoFile(name); if (file.exists) file.delete(); } catch {} }
+    },
+    deleteSeasonalVisit: async (placeId: string, visitId: string) => {
+      let filename: string | undefined;
+      await update(state => replacePlayer(state, family.activeId, player => {
+        filename = player.seasonalPlaces?.find(place => place.id === placeId)?.visits.find(visit => visit.id === visitId)?.photo;
+        return removeSeasonVisit(player, placeId, visitId);
+      }));
+      if (filename) { try { const file = photoFile(filename); if (file.exists) file.delete(); } catch {} }
+    },
+    saveSeasonBook: (uri: string, playerId: string, placeId: string, visitIds: string[]) => enqueue(async () => {
+      if (resetInProgress.current) throw new Error('Reset is incomplete');
+      const place = current.current.players.find(player => player.id === playerId)?.seasonalPlaces?.find(item => item.id === placeId);
+      if (!place || !visitIds.length || visitIds.some(id => !place.visits.some(visit => visit.id === id))) throw new Error('Place is unavailable');
+      bookDirectory().create({ idempotent: true, intermediates: true });
+      const destination = new File(bookDirectory(), `seasons-${randomUUID()}.pdf`);
+      try { new File(uri).copy(destination); }
+      catch (error) { if (destination.exists) destination.delete(); throw error; }
+      return destination.uri;
+    }),
     saveStory: (memoryId: string, story: string) =>
       update(state => replacePlayer(state, family.activeId, player => editMemory(player, memoryId, { story }))),
     saveArtwork: async (memoryId: string, uri: string) => {

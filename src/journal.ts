@@ -1,3 +1,4 @@
+import { restoreSeasonalPlaces, type SeasonalPlace } from './seasons';
 import type { Avatar, Language } from './missions';
 import { landmarks, landmarkXP, restoreLandmarkVisits } from './landmarks';
 import { currentRun, initialRewards, reachedMilestones, totalXP, type Rewards } from './rewards';
@@ -16,7 +17,7 @@ export type Memory = {
   coloredPhoto?: string;
 };
 export type Profile = { name: string; avatar: Avatar };
-type Progress = { memories: Memory[]; previousRunCount?: number; rewards: Rewards; visitedLandmarks?: string[] };
+type Progress = { memories: Memory[]; previousRunCount?: number; rewards: Rewards; visitedLandmarks?: string[]; seasonalPlaces?: SeasonalPlace[] };
 export type Player = Progress & { id: string; profile: Profile };
 export type Family = { version: 2; language: Language; activeId?: string; players: Player[] };
 type LegacyJournal = Progress & { version: 1; language: Language; profile?: Profile };
@@ -26,10 +27,10 @@ export const emptyProgress: Progress = { memories: [], rewards: initialRewards }
 export function restoreFamily(data: LegacyJournal | Family): Family {
   if (!['en', 'sv'].includes(data.language)) throw new Error('Invalid journal language');
   if (data.version === 1 && Array.isArray(data.memories)) {
-    const { profile, memories, previousRunCount, rewards, language } = data;
+    const { profile, memories, previousRunCount, rewards, language, seasonalPlaces } = data;
     return restoreFamily({
       version: 2, language, activeId: profile ? 'original-player' : undefined,
-      players: profile ? [{ id: 'original-player', profile, memories, previousRunCount, rewards }] : [],
+      players: profile ? [{ id: 'original-player', profile, memories, previousRunCount, rewards, seasonalPlaces }] : [],
     });
   }
   if (data.version !== 2 || !Array.isArray(data.players)) throw new Error('Invalid journal');
@@ -39,6 +40,7 @@ export function restoreFamily(data: LegacyJournal | Family): Family {
     players: data.players.map(player => ({
       ...player,
       visitedLandmarks: restoreLandmarkVisits(player.visitedLandmarks),
+      seasonalPlaces: restoreSeasonalPlaces(player.seasonalPlaces),
       rewards: {
         ...initialRewards,
         ...player.rewards,

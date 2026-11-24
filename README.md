@@ -252,3 +252,40 @@ Validation: `node scripts/check-family-book.cjs` checks legacy restore, immutabl
 edits/XP isolation, escaping, export page choices, resized temporary-file cleanup,
 selection limits and cancellation. Camera, PDF pagination and print services also
 need a physical-device smoke test.
+
+## One place through the seasons (1.7.0)
+
+Home and the album now link to a private seasonal-place collection for the active
+child. Give a place a name and an optional note explaining where to stand. The
+first saved visit remains the reference photo, even when an older photo is later
+imported. The reference is shown before launching the system camera; this is not
+a live camera overlay.
+
+A visit has its own normalized JPEG, editable draft date (YYYY-MM-DD) and up to
+400 characters of observations. Existing photos can be imported with their actual
+date. The app uses explicit calendar month groups: March–May, June–August,
+September–November and December–February. Progress counts distinct seasons within
+the selected calendar year; dates from other years never fill those slots. The
+latest dated visit per season is shown in the overview, with the latest save
+breaking same-day ties. Every visit remains in the timeline, loaded in batches.
+
+Select any two visits, including visits from different years, for a side-by-side
+comparison with dates and notes; optionally share the comparison as an image.
+The selected year's PDF book contains a cover and the latest photo/observations
+from each available season (at most four visit pages). It reuses the existing safe
+local PDF image preparation and offers sharing and printing.
+
+Seasonal places are optional journal-v2 fields. Regular memories, original photos,
+XP and rewards are not changed. Visit files are copied inside the existing queued
+journal transaction; persistence failures remove the new copy. Deletion removes
+metadata before cleaning its photos. Reset clears seasonal photos and private
+PDFs with the rest of the game. Late camera/PDF results are rejected or ignored
+after reset/navigation, and unsaved drafts are guarded on back navigation.
+Previously exported PDF files remain snapshots until the app is reset or the
+parent removes copies saved outside the app.
+
+`node scripts/check-seasons.cjs` covers season boundaries, leap dates, year
+isolation, latest-photo selection, stable reference/history, idempotence,
+XP/reward isolation, legacy restore, malformed data, deletion and seasonal PDF
+selection/escaping/cancellation. Camera alignment, image sharing and physical
+print services need a device smoke test.

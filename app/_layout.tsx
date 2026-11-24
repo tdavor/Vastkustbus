@@ -58,6 +58,7 @@ function Routes() {
         <Stack.Screen name="discover-city/index" />
         <Stack.Screen name="discover-city/[countryId]" />
         <Stack.Screen name="city/[id]" />
+        <Stack.Screen name="landmark-photo/[id]" />
         <Stack.Screen name="slideshow" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="memory/[id]" />
         <Stack.Screen name="coloring/[id]" />

@@ -1,3 +1,4 @@
+import { persistCityPhoto, type CityPhotoDraft } from './city-photo';
 import { addSeasonPlace, addSeasonVisit, removeSeasonPlace, removeSeasonVisit } from './seasons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { randomUUID } from 'expo-crypto';
@@ -225,6 +226,11 @@ function useJournalState() {
       try { new File(uri).copy(destination); }
       catch (error) { if (destination.exists) destination.delete(); throw error; }
       return destination.uri;
+    }),
+    saveCityPhoto: (playerId: string, landmarkId: string, uri: string, draft: CityPhotoDraft) => persistCityPhoto({
+      playerId, landmarkId, draft, update,
+      copyPhoto: () => savePhoto(uri, draft.photo),
+      removePhoto: () => { const file = photoFile(draft.photo); if (file.exists) file.delete(); },
     }),
     checkInLandmark: async (landmarkId: string) => {
       let earned = 0;

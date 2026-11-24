@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 env:
-  RELEASE_TAG: v1.7.7
+  RELEASE_TAG: v1.7.8
 
 
 jobs:
@@ -98,6 +98,7 @@ jobs:
           node scripts/check-hold-reset.cjs
           node scripts/check-play-safety.cjs
           node scripts/check-cities.cjs
+          node scripts/check-city-photos.cjs
           npx expo prebuild --platform android --no-install
           sed -i 's/signingConfig signingConfigs.debug/signingConfig null/' android/app/build.gradle
           cd android
@@ -164,6 +165,6 @@ jobs:
         with:
           name: signed-google-play-bundle
           path: |
-            MinneTrail-v1.7.7.aab
-            MinneTrail-v1.7.7.aab.sha256
+            MinneTrail-v1.7.8.aab
+            MinneTrail-v1.7.8.aab.sha256
           if-no-files-found: error

@@ -93,6 +93,7 @@ jobs:
           node scripts/check-hold-reset.cjs
           node scripts/check-play-safety.cjs
           node scripts/check-cities.cjs
+          node scripts/check-city-photos.cjs
           npx expo prebuild --platform android --no-install
           cd android
           ./gradlew :informative-drawings:testReleaseUnitTest :app:assembleRelease --no-daemon --max-workers=3 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a

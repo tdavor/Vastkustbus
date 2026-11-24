@@ -84,6 +84,8 @@ const { generateFamilyBook, BookCancelled } = load('src/family-book.ts', {
   await generateFamilyBook({ ...opts, drawings: false, artwork: false });
   assert.equal(modelCalls, 0, 'optional drawing generation is truly skipped');
   assert.equal((capturedHTML.match(/<section /g) || []).length, 2);
+  await generateFamilyBook({ ...opts, language: 'en', memories: [{ ...memory, missionId: 0, landmarkId: 'stockholm-slottet' }], drawings: false, artwork: false });
+  assert(capturedHTML.includes('The Royal Palace'), 'city photos retain their landmark title in the exported album');
   await assert.rejects(generateFamilyBook({ ...opts, active: () => false }), BookCancelled);
   await assert.rejects(generateFamilyBook({ ...opts, memories: Array(13).fill(memory) }), /Invalid selection/);
   console.log('Memory edits, legacy restore, XP isolation, safe PDF HTML, page selection, resize/cleanup and cancellation checks passed.');

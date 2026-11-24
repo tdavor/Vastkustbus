@@ -95,6 +95,12 @@ export function CityGuide({ city }: { city: City }) {
               disabled={visited || saving !== undefined}
               onPress={() => { void checkIn(place); }}
             />
+            <Button title={t.photo} icon="camera-outline" tone="quiet" disabled={saving !== undefined}
+              onPress={() => router.push({ pathname: '/landmark-photo/[id]', params: { id: place.id } })} />
+            {journal.memories.filter(memory => memory.landmarkId === place.id).length > 0 && <>
+              <Text style={styles.small}>{t.photoCount(journal.memories.filter(memory => memory.landmarkId === place.id).length)}</Text>
+              <Button title={t.album} icon="book-outline" tone="quiet" onPress={() => router.push('/book')} />
+            </>}
             {message && <Text accessibilityLiveRegion="polite" accessibilityRole={error ? 'alert' : undefined}
               style={error ? styles.error : styles.body}>{message.kind === 'earned' ? t.earned(place.name) : t[message.kind]}</Text>}
           </View>

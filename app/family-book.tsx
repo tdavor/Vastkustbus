@@ -1,3 +1,4 @@
+import { memoryTitle } from '../src/memory-labels';
 import { useParentalGate } from '../src/parent-gate';
 import { File } from 'expo-file-system';
 import * as Print from 'expo-print';
@@ -9,7 +10,6 @@ import { drawingEngineAvailable } from '../src/coloring';
 import { BookCancelled, generateFamilyBook } from '../src/family-book';
 import { maxBookMemories } from '../src/family-book-html';
 import { dateLabel } from '../src/memory';
-import { missions } from '../src/missions';
 import { photoFile, useJournal } from '../src/store';
 import { copy } from '../src/text';
 import { Button, colors, Page, styles } from '../src/ui';
@@ -121,7 +121,7 @@ export default function FamilyBookPage() {
     {choices.map(memory => <Pressable key={memory.id} accessibilityRole="checkbox" accessibilityState={{ checked: selected.includes(memory.id), disabled: busy }}
       disabled={busy} onPress={() => toggle(memory.id)} style={[styles.card, selected.includes(memory.id) && { borderColor: colors.forest, backgroundColor: colors.paleGreen }]}>
       <Image source={{ uri: photoFile(memory.photo).uri }} style={{ width: 92, height: 92, borderRadius: 12 }} accessibilityLabel={t.photo} />
-      <Text style={styles.heading}>{selected.includes(memory.id) ? '✓ ' : ''}{missions.find(mission => mission.id === memory.missionId)?.title[language] ?? t.mission}</Text>
+      <Text style={styles.heading}>{selected.includes(memory.id) ? '✓ ' : ''}{memoryTitle(memory, language)}</Text>
       <Text style={styles.small}>{dateLabel(memory, language)}</Text>
       {!!memory.story && <Text numberOfLines={2} style={styles.body}>{memory.story}</Text>}
     </Pressable>)}

@@ -1,3 +1,4 @@
+import { memoryCity } from './memory-labels';
 import { useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import { quickTags, type Language } from './missions';
@@ -6,6 +7,7 @@ import { copy } from './text';
 import { styles } from './ui';
 
 export function placeLabel(memory: Memory, language: Language) {
+  if (memory.landmarkId) return memoryCity(memory, language);
   const { place } = memory;
   return place ? 'text' in place ? place.text : quickTags[place.tag]?.[language] : undefined;
 }

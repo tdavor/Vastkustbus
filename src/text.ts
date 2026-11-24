@@ -1,4 +1,4 @@
-export const appName = 'Västkustbus';
+export const appName = 'MinneTrail';
 
 export const copy = {
   en: {
@@ -89,7 +89,7 @@ export const copy = {
     bookPhotos: "Adventure photo",
     bookDrawing: "Coloring page",
     bookArtwork: "Our colored drawing",
-    bookCredit: "Made together with Västkustbus",
+    bookCredit: "Made together with MinneTrail",
     bookCount: "adventures",
     bookPreparingPdf: "Creating the PDF…",
     selectAllBook: "Select first 12",
@@ -224,7 +224,7 @@ export const copy = {
     bookPhotos: "Foto från äventyret",
     bookDrawing: "Målarbild",
     bookArtwork: "Vår färglagda bild",
-    bookCredit: "Skapad tillsammans med Västkustbus",
+    bookCredit: "Skapad tillsammans med MinneTrail",
     bookCount: "äventyr",
     bookPreparingPdf: "Skapar PDF-filen…",
     selectAllBook: "Välj de första 12",

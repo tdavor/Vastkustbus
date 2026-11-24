@@ -95,6 +95,14 @@ jobs:
           cd android
           ./gradlew :informative-drawings:testReleaseUnitTest :app:assembleRelease --no-daemon --max-workers=3 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
 
+      - name: Verify Android application identity
+        run: |
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging android/app/build/outputs/apk/release/app-release.apk > "$RUNNER_TEMP/app-identity.txt"
+          grep -F "package: name='se.minnetrail.app'" "$RUNNER_TEMP/app-identity.txt"
+          grep -F "application-label:'MinneTrail'" "$RUNNER_TEMP/app-identity.txt"
+          npx expo-modules-autolinking resolve --platform android --json > "$RUNNER_TEMP/expo-modules.json"
+          grep -F 'se.minnetrail.drawings.InformativeDrawingsModule' "$RUNNER_TEMP/expo-modules.json"
+
       - name: Verify the packaged offline drawing model
         run: |
           unzip -p android/app/build/outputs/apk/release/app-release.apk assets/models/informative-style1.onnx > "$RUNNER_TEMP/packaged-drawing.onnx"

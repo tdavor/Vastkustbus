@@ -1,6 +1,6 @@
 {
-  "name": "vastkustbus",
-  "version": "1.7.3",
+  "name": "minnetrail",
+  "version": "1.7.4",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {

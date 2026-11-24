@@ -1,4 +1,4 @@
-package se.vastkustbus.drawings
+package se.minnetrail.drawings
 
 /** White-point adjustment: fade weak lines; 100 preserves every model pixel. */
 internal object DrawingDetail {

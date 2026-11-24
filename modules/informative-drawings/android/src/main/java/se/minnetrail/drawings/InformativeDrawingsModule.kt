@@ -1,4 +1,4 @@
-package se.vastkustbus.drawings
+package se.minnetrail.drawings
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

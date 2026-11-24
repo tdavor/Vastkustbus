@@ -2,10 +2,10 @@ plugins {
   id 'com.android.library'
   id 'expo-module-gradle-plugin'
 }
-group = 'se.vastkustbus'
+group = 'se.minnetrail'
 version = '1.0.0'
 android {
-  namespace 'se.vastkustbus.drawings'
+  namespace 'se.minnetrail.drawings'
   defaultConfig {
     minSdkVersion 24
     versionCode 1

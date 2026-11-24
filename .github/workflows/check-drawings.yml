@@ -16,12 +16,17 @@ permissions:
   contents: read
 
 env:
-  RELEASE_TAG: v1.7.5
-  EXPO_PUBLIC_DISTRIBUTION: play
+  RELEASE_TAG: v1.7.6
+
 
 jobs:
   build:
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    strategy:
+      matrix:
+        distribution: [github, play]
+    env:
+      EXPO_PUBLIC_DISTRIBUTION: ${{ matrix.distribution }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -92,6 +97,7 @@ jobs:
           node scripts/check-seasons.cjs
           node scripts/check-hold-reset.cjs
           node scripts/check-play-safety.cjs
+          node scripts/check-cities.cjs
           npx expo prebuild --platform android --no-install
           sed -i 's/signingConfig signingConfigs.debug/signingConfig null/' android/app/build.gradle
           cd android
@@ -142,20 +148,22 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ !inputs.build_only }}
         with:
-          name: signed-apk
+          name: signed-apk-${{ matrix.distribution }}
           path: Vastkustbus-*.apk
           if-no-files-found: error
 
       - name: Validate and sign Google Play bundle
+        if: matrix.distribution == 'play'
         env:
           SIGNING_KEY_BASE64: ${{ secrets.ANDROID_SIGNING_KEY_BASE64 }}
           SIGNING_CERT_BASE64: ${{ secrets.ANDROID_SIGNING_CERT_BASE64 }}
         run: bash scripts/sign-play-bundle.sh
 
       - uses: actions/upload-artifact@v4
+        if: matrix.distribution == 'play'
         with:
           name: signed-google-play-bundle
           path: |
-            MinneTrail-v1.7.5.aab
-            MinneTrail-v1.7.5.aab.sha256
+            MinneTrail-v1.7.6.aab
+            MinneTrail-v1.7.6.aab.sha256
           if-no-files-found: error

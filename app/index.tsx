@@ -6,6 +6,7 @@ import { Alert, Image, Linking, Modal, Pressable, ScrollView, Text, TextInput, V
 import { avatars, levelFor, type Avatar } from '../src/missions';
 import { useJournal } from '../src/store';
 import { appName, copy } from '../src/text';
+import { HoldResetButton } from '../src/hold-reset-button';
 import { drawingLicense } from '../src/drawing-license';
 import { milestones, rewardsCopy } from '../src/rewards';
 import { useUpdates } from '../src/updates';
@@ -133,8 +134,8 @@ export default function Home() {
                 </>}
                 <Button title={t.addPlayer} icon="person-add-outline" tone="quiet" disabled={busy}
                   onPress={() => { setName(''); setAvatar('moose'); setError(false); setSettings('add'); }} />
-                <Button title={t.resetProgress} icon="refresh-outline" disabled={busy}
-                  tone="quiet" onPress={() => Alert.alert(t.resetConfirm, t.resetDetails, [
+                <HoldResetButton title={t.resetProgress} hint={t.resetHoldHint} disabled={busy}
+                  onComplete={() => Alert.alert(t.resetConfirm, t.resetDetails, [
                     { text: t.cancel, style: 'cancel' },
                     { text: t.resetProgress, style: 'destructive', onPress: () => void apply(async () => {
                       await resetGame();

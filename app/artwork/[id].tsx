@@ -1,3 +1,4 @@
+import { useParentalGate } from '../../src/parent-gate';
 import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
@@ -11,6 +12,7 @@ import { copy } from '../../src/text';
 import { Button, Page, styles } from '../../src/ui';
 
 export default function ArtworkPage() {
+  const { authorize } = useParentalGate();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { journal: { language, memories }, saveArtwork } = useJournal();
   const memory = memories.find(item => item.id === id);
@@ -61,6 +63,7 @@ export default function ArtworkPage() {
     if (!uri || loaded !== uri || locked.current) return;
     locked.current = true; setBusy(true); setError('');
     try {
+      if (!await authorize('sharing')) return;
       if (print) await printImage(uri);
       else {
         if (!await Sharing.isAvailableAsync()) throw new Error('Sharing unavailable');

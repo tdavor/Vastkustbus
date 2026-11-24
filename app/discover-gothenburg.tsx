@@ -1,3 +1,4 @@
+import { useParentalGate } from '../src/parent-gate';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -7,6 +8,7 @@ import { useJournal } from '../src/store';
 import { Button, colors, Page, styles } from '../src/ui';
 
 export default function DiscoverGothenburg() {
+  const { authorize } = useParentalGate();
   const { journal, activePlayerId, checkInLandmark } = useJournal();
   const [saving, setSaving] = useState<string>();
   const inFlight = useRef(false);
@@ -38,6 +40,7 @@ export default function DiscoverGothenburg() {
     const playerId = activePlayerId;
     setNotice(undefined);
     try {
+      if (!await authorize('external')) return;
       await Linking.openURL(landmarkMapURL(place, Platform.OS));
     } catch {
       setNotice({ playerId, placeId: place.id, error: true, text: 'Kartan kunde inte öppnas. Försök igen.' });

@@ -1,3 +1,5 @@
+import { isPlayBuild, privacyURL } from '../src/distribution';
+import { useParentalGate } from '../src/parent-gate';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
@@ -12,10 +14,11 @@ import { milestones, rewardsCopy } from '../src/rewards';
 import { useUpdates } from '../src/updates';
 import { Animal, ExplorerAvatar, Button, Chip, colors, Page, styles } from '../src/ui';
 
-const authorEmail = 'tdavor@gmail.com';
+const authorEmail = 't.davor@gmail.com';
 const supportUrl = 'https://buymeacoffee.com/wjkrddbhyx';
 
 export default function Home() {
+  const { authorize, changePIN } = useParentalGate();
   const { journal, xp, setLanguage, addPlayer, selectPlayer, players, activePlayerId, resetGame } = useJournal();
   const { language, profile } = journal;
   const updates = useUpdates();
@@ -38,7 +41,8 @@ export default function Home() {
     try { await action(); } catch { setError(true); } finally { setBusy(false); }
   }
 
-  function openLink(url: string) {
+  async function openLink(url: string) {
+    if (!await authorize('external')) return;
     setLinkError(false);
     void Linking.openURL(url).catch(() => setLinkError(true));
   }
@@ -138,6 +142,7 @@ export default function Home() {
                   onComplete={() => Alert.alert(t.resetConfirm, t.resetDetails, [
                     { text: t.cancel, style: 'cancel' },
                     { text: t.resetProgress, style: 'destructive', onPress: () => void apply(async () => {
+                      if (!await authorize('settings')) return;
                       await resetGame();
                       setName('');
                       setAvatar('moose');
@@ -147,6 +152,7 @@ export default function Home() {
                   ])} />
                 <Button title={t.about} icon="information-circle-outline" tone="quiet" onPress={() => setSettings('about')} />
                 <Button title="Buy me a coffee" icon="cafe-outline" tone="yellow" onPress={() => openLink(supportUrl)} />
+                {isPlayBuild && <Button title={t.parentChangePIN} icon="key-outline" tone="quiet" disabled={busy} onPress={() => { void changePIN(); }} />}
                 {linkError && <Text accessibilityRole="alert" style={styles.error}>{t.linkError}</Text>}
               </>}
               {settings === 'add' && <>
@@ -157,14 +163,15 @@ export default function Home() {
                 <Text accessibilityRole="header" style={styles.heading}>{t.about} · {appName}</Text>
                 <Text style={styles.body}>{t.freeForever}</Text>
                 <Text style={styles.body}>{t.appVersion} {Constants.expoConfig?.version ?? '–'}</Text>
-                <Button title={updates.phase === 'checking' ? t.checkingUpdate : t.checkUpdate}
+                <Button title={isPlayBuild ? t.playUpdates : updates.phase === 'checking' ? t.checkingUpdate : t.checkUpdate}
                   icon="cloud-download-outline" tone="quiet" disabled={updates.phase !== 'idle'}
-                  onPress={() => { void updates.check(language, true); }} />
+                  onPress={() => { void (async () => { if (await authorize('external')) await updates.check(language, true); })(); }} />
                 {updates.feedback && <Text accessibilityLiveRegion="polite"
                   style={updates.feedback === 'updateError' ? styles.error : styles.small}>{t[updates.feedback]}</Text>}
                 <Text style={styles.body}>{t.author} · {authorEmail}</Text>
                 <Text style={styles.body}>{t.feedback}</Text>
                 <Button title={authorEmail} icon="mail-outline" tone="quiet" onPress={() => openLink(`mailto:${authorEmail}`)} />
+                <Button title={t.privacyPolicy} icon="shield-checkmark-outline" tone="quiet" onPress={() => { void openLink(privacyURL); }} />
                 <Text style={styles.small}>{t.drawingCredit}</Text>
                 <Button title={t.drawingLicense} icon="document-text-outline" tone="quiet"
                   onPress={() => setShowDrawingLicense(previous => !previous)} />

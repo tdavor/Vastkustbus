@@ -1,3 +1,4 @@
+import { useParentalGate } from '../../src/parent-gate';
 import { File } from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
@@ -24,6 +25,7 @@ function Photo({ photo, label, onLoaded }: { photo: string; label: string; onLoa
 function discardFile(uri?: string) { if (uri) { try { const file = new File(uri); if (file.exists) file.delete(); } catch {} } }
 
 export default function SeasonalPlacePage() {
+  const { authorize } = useParentalGate();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { journal: { language, profile, seasonalPlaces = [] }, activePlayerId, addSeasonalVisit, deleteSeasonalVisit, deleteSeasonalPlace, saveSeasonBook } = useJournal();
   const place = seasonalPlaces.find(item => item.id === id);
@@ -146,6 +148,7 @@ export default function SeasonalPlacePage() {
     if (lock.current || !comparison.current || !comparisonReady) return;
     lock.current = true; setBusy(true); setError('');
     try {
+      if (!await authorize('sharing')) return;
       if (!await Sharing.isAvailableAsync()) throw new Error('Sharing unavailable');
       const uri = await captureRef(comparison, { format: 'png', result: 'tmpfile' });
       await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: t.seasonCompare });
@@ -171,6 +174,7 @@ export default function SeasonalPlacePage() {
     if (!pdf || lock.current) return;
     lock.current = true; setBusy(true); setError('');
     try {
+      if (!await authorize('sharing')) return;
       if (print) await Print.printAsync({ uri: pdf });
       else {
         if (!await Sharing.isAvailableAsync()) throw new Error('Sharing unavailable');

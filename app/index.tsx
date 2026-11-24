@@ -146,6 +146,8 @@ export default function Home() {
                     }) },
                   ])} />
                 <Button title={t.about} icon="information-circle-outline" tone="quiet" onPress={() => setSettings('about')} />
+                <Button title="Buy me a coffee" icon="cafe-outline" tone="yellow" onPress={() => openLink(supportUrl)} />
+                {linkError && <Text accessibilityRole="alert" style={styles.error}>{t.linkError}</Text>}
               </>}
               {settings === 'add' && <>
                 <Text accessibilityRole="header" style={styles.heading}>{t.addPlayer}</Text>
@@ -153,6 +155,7 @@ export default function Home() {
               </>}
               {settings === 'about' && <>
                 <Text accessibilityRole="header" style={styles.heading}>{t.about} · {appName}</Text>
+                <Text style={styles.body}>{t.freeForever}</Text>
                 <Text style={styles.body}>{t.appVersion} {Constants.expoConfig?.version ?? '–'}</Text>
                 <Button title={updates.phase === 'checking' ? t.checkingUpdate : t.checkUpdate}
                   icon="cloud-download-outline" tone="quiet" disabled={updates.phase !== 'idle'}
@@ -162,7 +165,6 @@ export default function Home() {
                 <Text style={styles.body}>{t.author} · {authorEmail}</Text>
                 <Text style={styles.body}>{t.feedback}</Text>
                 <Button title={authorEmail} icon="mail-outline" tone="quiet" onPress={() => openLink(`mailto:${authorEmail}`)} />
-                <Button title="Buy me a coffee" icon="cafe-outline" tone="yellow" onPress={() => openLink(supportUrl)} />
                 <Text style={styles.small}>{t.drawingCredit}</Text>
                 <Button title={t.drawingLicense} icon="document-text-outline" tone="quiet"
                   onPress={() => setShowDrawingLicense(previous => !previous)} />

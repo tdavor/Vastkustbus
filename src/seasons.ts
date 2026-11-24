@@ -29,10 +29,10 @@ export function visitDateLabel(value: string, language: Language) {
   const [year, month, day] = value.split('-').map(Number);
   return new Date(year, month - 1, day, 12).toLocaleDateString(language === 'sv' ? 'sv-SE' : 'en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
 }
-export function yearSummary(place: SeasonalPlace, year: number): Partial<Record<Season, SeasonVisit>> {
+export function yearSummary(place: SeasonalPlace, year?: number): Partial<Record<Season, SeasonVisit>> {
   const result: Partial<Record<Season, SeasonVisit>> = {};
   for (const visit of place.visits) {
-    if (Number(visit.date.slice(0, 4)) !== year) continue;
+    if (year !== undefined && Number(visit.date.slice(0, 4)) !== year) continue;
     const season = seasonForDate(visit.date);
     if (!result[season] || visit.date >= result[season]!.date) result[season] = visit;
   }

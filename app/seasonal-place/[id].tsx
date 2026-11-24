@@ -28,7 +28,7 @@ export default function SeasonalPlacePage() {
   const { journal: { language, profile, seasonalPlaces = [] }, activePlayerId, addSeasonalVisit, deleteSeasonalVisit, deleteSeasonalPlace, saveSeasonBook } = useJournal();
   const place = seasonalPlaces.find(item => item.id === id);
   const t = copy[language];
-  const [year, setYear] = useState(Number(todayLocal().slice(0, 4)));
+  const [year, setYear] = useState<number | undefined>(undefined);
   const [draft, setDraft] = useState<string>();
   const draftRef = useRef<string | undefined>(undefined);
   const [date, setDate] = useState(todayLocal());
@@ -64,7 +64,7 @@ export default function SeasonalPlacePage() {
     generation.current++;
     discardFile(draftRef.current); draftRef.current = undefined;
     setDraft(undefined); setNote(''); setDate(todayLocal()); setComparing([]); setLoaded([]); setPDF(undefined); setError(''); setVisible(20);
-    setYear(Number(todayLocal().slice(0, 4)));
+    setYear(undefined);
   }, [routeKey]);
 
   function goBack() { if (router.canGoBack()) router.back(); else router.replace('/seasonal-places'); }
@@ -120,7 +120,7 @@ export default function SeasonalPlacePage() {
     try {
       await addSeasonalVisit(place.id, draft, date, note);
       discardFile(draft); draftRef.current = undefined;
-      if (alive.current) { setDraft(undefined); setNote(''); setYear(Number(date.slice(0, 4))); setDate(todayLocal()); }
+      if (alive.current) { setDraft(undefined); setNote(''); setYear(previous => previous === undefined ? undefined : Number(date.slice(0, 4))); setDate(todayLocal()); }
     } catch { if (alive.current) setError(t.saveError); }
     finally { lock.current = false; if (alive.current) setBusy(false); }
   }
@@ -209,16 +209,21 @@ export default function SeasonalPlacePage() {
       </View>}
       {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
       <Text style={styles.heading}>{t.seasonYear}</Text>
-      <View style={styles.row}>{years.map(value => <Chip key={value} label={String(value)} selected={year === value} onPress={() => { if (!busy) setYear(value); }} />)}</View>
-      <Text style={styles.heading}>{t.seasonProgress}: {Object.keys(summary).length} / 4 · {year}</Text>
+      <View style={styles.row}><Chip label={t.seasonAllYears} selected={year === undefined} onPress={() => { if (!busy) setYear(undefined); }} />{years.map(value => <Chip key={value} label={String(value)} selected={year === value} onPress={() => { if (!busy) setYear(value); }} />)}</View>
+      <Text style={styles.heading}>{t.seasonProgress}: {Object.keys(summary).length} / 4 · {year ?? t.seasonAllYears}</Text>
       <View style={[styles.row, { alignItems: 'stretch' }]}>
         {seasons.map(season => <View key={season} style={[styles.card, { width: '48%', padding: 12, backgroundColor: seasonColors[season] }]}>
           <Text style={styles.heading}>{seasonTitle(season, language)}</Text>
           {summary[season] ? <>
             <Photo key={summary[season]!.photo} photo={summary[season]!.photo} label={t.seasonPhoto} />
             <Text style={styles.small}>{visitDateLabel(summary[season]!.date, language)}</Text>
-            {!!summary[season]!.note && <Text style={styles.body}>{summary[season]!.note}</Text>}
-            <Button title={t.seasonCompareSelect} icon="git-compare-outline" tone="quiet" disabled={busy} onPress={() => toggleCompare(summary[season]!.id)} />
+            {!!summary[season]!.note && <Text numberOfLines={3} style={styles.body}>{summary[season]!.note}</Text>}
+            <Pressable accessibilityRole="checkbox" accessibilityLabel={t.seasonCompareSelect}
+              accessibilityState={{ checked: comparing.includes(summary[season]!.id), disabled: busy }} disabled={busy}
+              style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 12, backgroundColor: colors.white }}
+              onPress={() => toggleCompare(summary[season]!.id)}>
+              <Text style={styles.small}>{comparing.includes(summary[season]!.id) ? '✓ ' : ''}{t.seasonCompareShort}</Text>
+            </Pressable>
           </> : <Text style={styles.small}>{t.seasonEmptySlot}</Text>}
         </View>)}
       </View>

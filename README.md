@@ -264,14 +264,14 @@ a live camera overlay.
 A visit has its own normalized JPEG, editable draft date (YYYY-MM-DD) and up to
 400 characters of observations. Existing photos can be imported with their actual
 date. The app uses explicit calendar month groups: March–May, June–August,
-September–November and December–February. Progress counts distinct seasons within
-the selected calendar year; dates from other years never fill those slots. The
+September–November and December–February. The default All years overview lets a project span New Year. When a calendar
+year is selected, dates from other years never fill its slots. The
 latest dated visit per season is shown in the overview, with the latest save
 breaking same-day ties. Every visit remains in the timeline, loaded in batches.
 
 Select any two visits, including visits from different years, for a side-by-side
 comparison with dates and notes; optionally share the comparison as an image.
-The selected year's PDF book contains a cover and the latest photo/observations
+The selected period's PDF book contains a cover and the latest photo/observations
 from each available season (at most four visit pages). It reuses the existing safe
 local PDF image preparation and offers sharing and printing.
 
@@ -285,7 +285,7 @@ Previously exported PDF files remain snapshots until the app is reset or the
 parent removes copies saved outside the app.
 
 `node scripts/check-seasons.cjs` covers season boundaries, leap dates, year
-isolation, latest-photo selection, stable reference/history, idempotence,
+isolation/cross-year projects, latest-photo selection, stable reference/history, idempotence,
 XP/reward isolation, legacy restore, malformed data, deletion and seasonal PDF
 selection/escaping/cancellation. Camera alignment, image sharing and physical
 print services need a device smoke test.

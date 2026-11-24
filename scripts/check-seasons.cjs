@@ -35,6 +35,15 @@ assert.equal(Object.keys(year).length, 4);
 assert.equal(year.spring.id, 'six', 'latest saved photo breaks same-day ties');
 assert.equal(Object.keys(s.yearSummary(place, 2025)).length, 1);
 assert(!Object.keys(s.yearSummary(place, 2027)).length);
+const crossYear = { ...place, visits: [
+  {id:'a',date:'2026-11-01',photo:'season-a.jpg',note:''},
+  {id:'b',date:'2026-12-01',photo:'season-b.jpg',note:''},
+  {id:'c',date:'2027-04-01',photo:'season-c.jpg',note:''},
+  {id:'d',date:'2027-07-01',photo:'season-d.jpg',note:''},
+] };
+assert.equal(Object.keys(s.yearSummary(crossYear)).length,4,'a project can span New Year');
+assert.equal(Object.keys(s.yearSummary(crossYear,2026)).length,2);
+assert.equal(Object.keys(s.yearSummary(crossYear,2027)).length,2);
 assert.equal(s.addSeasonVisit(player,'p',place.visits[0]),player,'duplicate visit does not duplicate photos');
 assert.throws(()=>s.addSeasonVisit(player,'missing',place.visits[0]));
 assert.throws(()=>s.addSeasonVisit(player,'p',{id:'bad',date:'2026-02-30',photo:'season-bad.jpg',note:''}));
@@ -67,6 +76,9 @@ const {generateSeasonBook}=load('src/season-book.ts',{
   assert(capturedHTML.includes('besök') && capturedHTML.includes('Årstidsfoto'));
   assert(capturedHTML.includes('&lt;script&gt;') && !capturedHTML.includes('<script>'));
   assert(!/https?:\/\//.test(capturedHTML));
+  const spanningBook=await generateSeasonBook(crossYear,undefined,'Child','sv',()=>true);
+  assert.equal(spanningBook.visitIds.length,4);
+  assert(capturedHTML.includes('Alla år'));
   await assert.rejects(generateSeasonBook(place,2027,'Child','sv',()=>true),/No visits/);
   await assert.rejects(generateSeasonBook(place,2026,'Child','sv',()=>false),BookCancelled);
   console.log('Season dates/leap years/year isolation/reference/history/XP/restore/delete and safe seasonal PDF checks passed.');

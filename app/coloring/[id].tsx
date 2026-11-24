@@ -1,3 +1,4 @@
+import { useParentalGate } from '../../src/parent-gate';
 import Slider from '@react-native-community/slider';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
@@ -10,6 +11,7 @@ import { copy } from '../../src/text';
 import { Button, colors, Page, styles } from '../../src/ui';
 
 export default function ColoringPage() {
+  const { authorize } = useParentalGate();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { journal: { memories, language } } = useJournal();
   const memory = memories.find(item => item.id === id);
@@ -63,6 +65,7 @@ export default function ColoringPage() {
     setOperation(true);
     setError(undefined);
     try {
+      if (!await authorize('sharing')) return;
       if (print) await printImage(uri);
       else {
         if (!await Sharing.isAvailableAsync()) throw new Error('Sharing unavailable');

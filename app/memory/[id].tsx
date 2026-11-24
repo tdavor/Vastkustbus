@@ -1,3 +1,4 @@
+import { useParentalGate } from '../../src/parent-gate';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import * as Sharing from 'expo-sharing';
@@ -14,6 +15,7 @@ import { appName, copy } from '../../src/text';
 import { Animal, Button, colors, Page, styles } from '../../src/ui';
 
 export default function MemoryDetail() {
+  const { authorize } = useParentalGate();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { journal: { language, memories, profile, rewards }, xp, updateRewards, saveStory } = useJournal();
   const memory = memories.find(item => item.id === id);
@@ -33,6 +35,7 @@ export default function MemoryDetail() {
     setBusy(true);
     setError(false);
     try {
+      if (!await authorize('sharing')) return;
       if (!await Sharing.isAvailableAsync()) throw new Error('Sharing unavailable');
       const uri = await captureRef(preview, { format: 'png', result: 'tmpfile' });
       await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: appName });
@@ -49,7 +52,10 @@ export default function MemoryDetail() {
     sharing.current = true;
     setBusy(true);
     setPrintError(false);
-    try { await printImage(photoFile(memory.photo).uri); }
+    try {
+      if (!await authorize('sharing')) return;
+      await printImage(photoFile(memory.photo).uri);
+    }
     catch { setPrintError(true); }
     finally { sharing.current = false; setBusy(false); }
   }

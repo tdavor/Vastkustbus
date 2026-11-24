@@ -1,3 +1,4 @@
+import { useParentalGate } from '../src/parent-gate';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
@@ -11,6 +12,7 @@ import { copy } from '../src/text';
 import { Button, Chip, colors, ExplorerAvatar, Page, styles } from '../src/ui';
 
 export default function RewardsScreen() {
+  const { authorize } = useParentalGate();
   const { journal: { rewards, profile, memories, language }, xp, activeMemories, updateRewards } = useJournal();
   const r = rewardsCopy[language];
   const t = copy[language];
@@ -69,6 +71,7 @@ export default function RewardsScreen() {
     setBusy(true);
     setError('');
     try {
+      if (!await authorize('sharing')) return;
       if (!await Sharing.isAvailableAsync()) throw new Error('Sharing unavailable');
       const uri = await captureRef(capture, { format: 'png', result: 'tmpfile' });
       await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: r.diploma });

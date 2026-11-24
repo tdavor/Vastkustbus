@@ -1,10 +1,11 @@
+import { isPlayBuild } from './distribution';
 import Constants from 'expo-constants';
 import { CryptoDigestAlgorithm, digest } from 'expo-crypto';
 import { Directory, File, Paths } from 'expo-file-system';
 import { createDownloadResumable, getContentUriAsync } from 'expo-file-system/legacy';
 import { startActivityAsync } from 'expo-intent-launcher';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, Alert, Modal, Platform, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, Platform, Text, View } from 'react-native';
 import type { Language } from './missions';
 import { copy } from './text';
 import { Button, colors, styles } from './ui';
@@ -47,6 +48,13 @@ function useUpdateState() {
   }, []);
 
   const check = useCallback(async (requestedLanguage: Language, manual = false) => {
+    if (isPlayBuild) {
+      if (manual) {
+        try { await Linking.openURL('https://play.google.com/store/apps/details?id=se.minnetrail.app'); }
+        catch { setFeedback('updateError'); }
+      }
+      return;
+    }
     if (running.current) return;
     if (Platform.OS !== 'android') {
       if (manual) setFeedback('updateAndroidOnly');
@@ -162,6 +170,6 @@ export function useStartupUpdate(ready: boolean, language: Language) {
   const currentLanguage = useRef(language);
   useEffect(() => { currentLanguage.current = language; }, [language]);
   useEffect(() => {
-    if (ready) void check(currentLanguage.current);
+    if (ready && !isPlayBuild) void check(currentLanguage.current);
   }, [ready, check]);
 }

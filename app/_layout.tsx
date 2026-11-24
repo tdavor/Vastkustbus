@@ -3,6 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Image, Text, useWindowDimensions, View } from 'react-native';
+import { ParentGateProvider } from '../src/parent-gate';
 import { JournalProvider, useJournal } from '../src/store';
 import { UpdatesProvider, useStartupUpdate } from '../src/updates';
 import { appName, copy } from '../src/text';
@@ -63,5 +64,5 @@ function Routes() {
 }
 
 export default function RootLayout() {
-  return <JournalProvider><UpdatesProvider><StatusBar style="dark" /><Routes /></UpdatesProvider></JournalProvider>;
+  return <JournalProvider><ParentGateProvider><UpdatesProvider><StatusBar style="dark" /><Routes /></UpdatesProvider></ParentGateProvider></JournalProvider>;
 }

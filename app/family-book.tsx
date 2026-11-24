@@ -1,3 +1,4 @@
+import { useParentalGate } from '../src/parent-gate';
 import { File } from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -14,6 +15,7 @@ import { copy } from '../src/text';
 import { Button, colors, Page, styles } from '../src/ui';
 
 export default function FamilyBookPage() {
+  const { authorize } = useParentalGate();
   const { journal: { language, memories, profile }, activePlayerId, saveFamilyBook } = useJournal();
   const t = copy[language];
   const [title, setTitle] = useState('');
@@ -79,6 +81,7 @@ export default function FamilyBookPage() {
     if (!pdf || locked.current) return;
     locked.current = true; setBusy(true); setError(false);
     try {
+      if (!await authorize('sharing')) return;
       if (print) await Print.printAsync({ uri: pdf });
       else {
         if (!await Sharing.isAvailableAsync()) throw new Error('Sharing unavailable');

@@ -9,13 +9,15 @@ on:
       - 'scripts/**'
       - 'package*.json'
       - 'app.json'
+      - 'app.config.js'
       - '.github/workflows/**'
 
 permissions:
   contents: read
 
 env:
-  RELEASE_TAG: v1.7.4
+  RELEASE_TAG: v1.7.5
+  EXPO_PUBLIC_DISTRIBUTION: play
 
 jobs:
   build:
@@ -89,9 +91,11 @@ jobs:
           node scripts/check-family-book.cjs
           node scripts/check-seasons.cjs
           node scripts/check-hold-reset.cjs
+          node scripts/check-play-safety.cjs
           npx expo prebuild --platform android --no-install
+          sed -i 's/signingConfig signingConfigs.debug/signingConfig null/' android/app/build.gradle
           cd android
-          ./gradlew :informative-drawings:testReleaseUnitTest :app:assembleRelease --no-daemon --max-workers=3 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+          ./gradlew :informative-drawings:testReleaseUnitTest :app:assembleRelease :app:bundleRelease --no-daemon --max-workers=3 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
 
       - name: Verify Android application identity
         run: |
@@ -137,4 +141,18 @@ jobs:
         with:
           name: signed-apk
           path: Vastkustbus-*.apk
+          if-no-files-found: error
+
+      - name: Validate and sign Google Play bundle
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.ANDROID_SIGNING_KEY_BASE64 }}
+          SIGNING_CERT_BASE64: ${{ secrets.ANDROID_SIGNING_CERT_BASE64 }}
+        run: bash scripts/sign-play-bundle.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-google-play-bundle
+          path: |
+            MinneTrail-v1.7.5.aab
+            MinneTrail-v1.7.5.aab.sha256
           if-no-files-found: error

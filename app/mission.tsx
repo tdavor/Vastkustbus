@@ -1,3 +1,4 @@
+import { isPlayBuild } from '../src/distribution';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { randomUUID } from 'expo-crypto';
 import * as ImagePicker from 'expo-image-picker';
@@ -61,6 +62,7 @@ export default function MissionScreen() {
   }, [browsing]);
 
   async function suggestLocation() {
+    if (isPlayBuild) return;
     const token = ++request.current;
     try {
       let permission = await Location.getForegroundPermissionsAsync();
@@ -121,7 +123,7 @@ export default function MissionScreen() {
       locked.current = false;
       setBusy(false);
     }
-    if (captured) void suggestLocation();
+    if (captured && !isPlayBuild) void suggestLocation();
   }
 
   async function save() {

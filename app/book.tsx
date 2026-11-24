@@ -17,6 +17,8 @@ export default function MemoryBook() {
       <Text style={styles.title}>{t.book}</Text>
       {rewards.unlocked.includes(300) && <Button title={rewardsCopy[language].slideshow} icon="images-outline"
         disabled={!memories.length} tone="yellow" onPress={() => router.push('/slideshow')} />}
+      {!!memories.length && <Button title={t.familyBook} icon="book-outline" tone="yellow"
+        onPress={() => router.push('/family-book')} />}
       {!sorted.length ? <View style={styles.card}><Text style={styles.body}>{t.empty}</Text></View> : <>
         <Text style={styles.small}>{t.archiveSubtitle}</Text>
         {sorted.map(memory => (
@@ -24,6 +26,8 @@ export default function MemoryBook() {
             onPress={() => router.push({ pathname: '/memory/[id]', params: { id: memory.id } })}>
             <MemoryPhoto memory={memory} language={language} />
             <Text style={styles.heading}>{missions.find(item => item.id === memory.missionId)?.title[language] ?? t.mission}</Text>
+            {!!memory.story && <Text numberOfLines={2} style={styles.body}>{memory.story}</Text>}
+            {!!memory.coloredPhoto && <Text style={styles.small}>{t.coloredArtwork} ✓</Text>}
             <Text style={styles.small}>{dateLabel(memory, language)} · {placeLabel(memory, language) ?? t.noPlace}</Text>
           </Pressable>
         ))}

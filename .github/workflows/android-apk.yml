@@ -88,6 +88,7 @@ jobs:
           fi
           npm run typecheck
           node scripts/check-coloring.cjs
+          node scripts/check-family-book.cjs
           npx expo prebuild --platform android --no-install
           cd android
           ./gradlew :informative-drawings:testReleaseUnitTest :app:assembleRelease --no-daemon --max-workers=3 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a

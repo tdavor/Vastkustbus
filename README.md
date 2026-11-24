@@ -223,3 +223,32 @@ Upstream: https://github.com/carolineec/informative-drawings
 Author demo/weights: https://huggingface.co/spaces/carolineec/informativedrawings
 MIT copyright/license notices are retained in `scripts/drawings/LICENSE.txt` and
 inside the Android asset bundle. ONNX Runtime is distributed under its MIT license.
+
+## Family memories (1.6.0)
+
+- **Our story:** an optional 600-character note on each memory. Saving a note does
+  not complete another mission or change XP/rewards. Saved notes also appear on
+  the shareable postcard. Unsaved edits are guarded when leaving the detail view.
+- **Colored artwork:** photograph or choose an image of the child's finished
+  coloring page. A normalized JPEG is saved separately from the original mission
+  photo and model drawing. A replacement becomes active only after journal
+  persistence succeeds; failed writes remove the new copy and preserve the old.
+- **Family PDF:** select up to 12 memories in the album, enter a book title, and
+  optionally include coloring pages and finished artwork. Pages are chronological.
+  The A4 book has a cover and a photo/story page per memory, plus optional drawing
+  and artwork pages. Photos are resized for memory usage; model PNGs retain their
+  original pixels. All content is embedded locally; user text is HTML-escaped.
+  Drawing generation is sequential and reuses existing caches. The screen shows
+  progress and offers PDF sharing/saving and printing after creation.
+
+Books stay in private app storage until a parent chooses a sharing destination.
+Resetting the game deletes private exported books along with memory photos and
+artwork. A reset or missing player/memory prevents a late export from being saved
+back into the app. Copies previously saved through other apps are outside the
+app's reset scope. The journal remains version 2 with optional memory fields, so
+existing player profiles and completed missions need no destructive migration.
+
+Validation: `node scripts/check-family-book.cjs` checks legacy restore, immutable
+edits/XP isolation, escaping, export page choices, resized temporary-file cleanup,
+selection limits and cancellation. Camera, PDF pagination and print services also
+need a physical-device smoke test.

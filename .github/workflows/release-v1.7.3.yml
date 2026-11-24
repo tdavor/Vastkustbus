@@ -1,0 +1,48 @@
+name: Publish verified MinneTrail 1.7.3
+on:
+  push:
+    branches: ["release/v1.7.3"]
+permissions:
+  contents: write
+  actions: read
+env:
+  RELEASE_TAG: v1.7.3
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify the tested source and signed artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          source_sha="42f319358c88a34b97ebb7be9282c8b0e471cbf0"
+          release_sha="7ecd9d81f99e44055ead42f159d0e653c707429d"
+          source_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$source_sha" --jq '.tree.sha')"
+          release_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$release_sha" --jq '.tree.sha')"
+          [[ "$source_tree" == "$release_tree" ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/45358273392" > run.json
+          jq -e --arg sha "$source_sha" '.conclusion == "success" and .head_sha == $sha' run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14904285888" > artifact.json
+          jq -e --arg sha "$source_sha" '.name == "signed-apk" and .expired == false and .workflow_run.head_sha == $sha' artifact.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14904285888/zip" > signed-apk.zip
+          echo "29ba183814595f340d3f9a40744ae0d3aee19202fda04a6c7ad4b2548209e733  signed-apk.zip" | sha256sum --check
+          unzip -j signed-apk.zip "Vastkustbus-v1.7.3.apk"
+          unzip -Z1 "Vastkustbus-v1.7.3.apk" | grep -Fx 'assets/models/informative-style1.onnx'
+          sha256sum "Vastkustbus-v1.7.3.apk"
+      - name: Create the exact main tag and publish Android update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_sha="7ecd9d81f99e44055ead42f159d0e653c707429d"
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$RELEASE_TAG" -f sha="$release_sha"
+          fi
+          actual="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha')"
+          [[ "$actual" == "$release_sha" ]]
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "MinneTrail $RELEASE_TAG" --notes "Appen heter nu MinneTrail. Endast namnet har ändrats; samma ikon, funktioner, uppdrag och sparade minnen finns kvar. Android 1.7.3 (19)." --repo "$GITHUB_REPOSITORY"
+          fi
+          gh release upload "$RELEASE_TAG" "Vastkustbus-v1.7.3.apk" --repo "$GITHUB_REPOSITORY"
+          gh release edit "$RELEASE_TAG" --draft=false --repo "$GITHUB_REPOSITORY"

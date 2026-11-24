@@ -27,10 +27,10 @@ export const emptyProgress: Progress = { memories: [], rewards: initialRewards }
 export function restoreFamily(data: LegacyJournal | Family): Family {
   if (!['en', 'sv'].includes(data.language)) throw new Error('Invalid journal language');
   if (data.version === 1 && Array.isArray(data.memories)) {
-    const { profile, memories, previousRunCount, rewards, language, seasonalPlaces } = data;
+    const { profile, memories, previousRunCount, rewards, language, seasonalPlaces, visitedLandmarks } = data;
     return restoreFamily({
       version: 2, language, activeId: profile ? 'original-player' : undefined,
-      players: profile ? [{ id: 'original-player', profile, memories, previousRunCount, rewards, seasonalPlaces }] : [],
+      players: profile ? [{ id: 'original-player', profile, memories, previousRunCount, rewards, seasonalPlaces, visitedLandmarks }] : [],
     });
   }
   if (data.version !== 2 || !Array.isArray(data.players)) throw new Error('Invalid journal');

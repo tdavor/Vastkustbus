@@ -48,6 +48,8 @@ function Routes() {
       <Stack.Protected guard={Boolean(journal.profile)}>
         <Stack.Screen name="mission" />
         <Stack.Screen name="book" />
+        <Stack.Screen name="seasonal-places" />
+        <Stack.Screen name="seasonal-place/[id]" />
         <Stack.Screen name="family-book" />
         <Stack.Screen name="artwork/[id]" />
         <Stack.Screen name="rewards" />

@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 env:
-  RELEASE_TAG: v1.6.0
+  RELEASE_TAG: v1.7.0
 
 jobs:
   build:
@@ -87,6 +87,7 @@ jobs:
           npm run typecheck
           node scripts/check-coloring.cjs
           node scripts/check-family-book.cjs
+          node scripts/check-seasons.cjs
           npx expo prebuild --platform android --no-install
           cd android
           ./gradlew :informative-drawings:testReleaseUnitTest :app:assembleRelease --no-daemon --max-workers=3 -PreactNativeArchitectures=arm64-v8a,armeabi-v7a

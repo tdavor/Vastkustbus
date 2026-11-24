@@ -1,0 +1,48 @@
+name: Publish verified Västkustbus 1.7.0
+on:
+  push:
+    branches: ["release/v1.7.0"]
+permissions:
+  contents: write
+  actions: read
+env:
+  RELEASE_TAG: v1.7.0
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify the tested source and signed artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          source_sha="c23fbd7a92d12b6af8d00bed6a076237e64f6a4d"
+          release_sha="89e386d7169acef732488055f697171b2ab9add0"
+          source_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$source_sha" --jq '.tree.sha')"
+          release_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$release_sha" --jq '.tree.sha')"
+          [[ "$source_tree" == "$release_tree" ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/45337848416" > run.json
+          jq -e --arg sha "$source_sha" '.conclusion == "success" and .head_sha == $sha' run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14895312203" > artifact.json
+          jq -e --arg sha "$source_sha" '.name == "signed-apk" and .expired == false and .workflow_run.head_sha == $sha' artifact.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14895312203/zip" > signed-apk.zip
+          echo "8c844cec0151d1add78c7ca231d06b0bb233590be3d024c28af6cdc1ea3b816d  signed-apk.zip" | sha256sum --check
+          unzip -j signed-apk.zip "Vastkustbus-v1.7.0.apk"
+          unzip -Z1 "Vastkustbus-v1.7.0.apk" | grep -Fx 'assets/models/informative-style1.onnx'
+          sha256sum "Vastkustbus-v1.7.0.apk"
+      - name: Create the exact main tag and publish Android update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_sha="89e386d7169acef732488055f697171b2ab9add0"
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$RELEASE_TAG" -f sha="$release_sha"
+          fi
+          actual="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha')"
+          [[ "$actual" == "$release_sha" ]]
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "Västkustbus $RELEASE_TAG" --notes "Nyheter: Samma plats genom årstiderna. Återvänd till en favoritplats, fotografera från samma vinkel och spara datum och upptäckter. Följ alla fyra årstider även över årsskiftet, jämför två foton och skapa en platsbok som PDF att dela eller skriva ut. Finns på startsidan och i albumet. Allt sparas lokalt. Android 1.7.0 (16)." --repo "$GITHUB_REPOSITORY"
+          fi
+          gh release upload "$RELEASE_TAG" "Vastkustbus-v1.7.0.apk" --repo "$GITHUB_REPOSITORY"
+          gh release edit "$RELEASE_TAG" --draft=false --repo "$GITHUB_REPOSITORY"

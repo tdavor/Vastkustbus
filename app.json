@@ -2,14 +2,14 @@
   "expo": {
     "name": "MinneTrail",
     "slug": "minnetrail",
-    "version": "1.7.6",
+    "version": "1.7.7",
     "scheme": "minnetrail",
     "platforms": ["android"],
     "userInterfaceStyle": "light",
     "icon": "./assets/launcher.png",
     "android": {
       "package": "se.minnetrail.app",
-      "versionCode": 22,
+      "versionCode": 23,
       "adaptiveIcon": {
         "foregroundImage": "./assets/launcher.png",
         "backgroundColor": "#FEFAE0"

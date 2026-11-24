@@ -1,3 +1,4 @@
+import { guideCopy } from '../src/city-copy';
 import { isPlayBuild, privacyURL } from '../src/distribution';
 import { useParentalGate } from '../src/parent-gate';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -204,7 +205,7 @@ export default function Home() {
         <Button title={t.start} icon="compass-outline" tone="yellow" onPress={() => router.push('/mission')} />
         <Button title={t.book} icon="book-outline" onPress={() => router.push('/book')} />
         <Button title={t.seasonPlaces} icon="leaf-outline" tone="quiet" onPress={() => router.push('/seasonal-places')} />
-        <Button title="Lär känna din stad" icon="compass-outline" tone="quiet" onPress={() => router.push('/discover-city')} />
+        <Button title={guideCopy[journal.language].title} icon="compass-outline" tone="quiet" onPress={() => router.push('/discover-city')} />
       </> : <>
         <Text style={styles.title}>{t.welcome}</Text>
         <Text style={styles.body}>{t.intro}</Text>

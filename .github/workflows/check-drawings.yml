@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 env:
-  RELEASE_TAG: v1.7.6
+  RELEASE_TAG: v1.7.7
 
 
 jobs:
@@ -164,6 +164,6 @@ jobs:
         with:
           name: signed-google-play-bundle
           path: |
-            MinneTrail-v1.7.6.aab
-            MinneTrail-v1.7.6.aab.sha256
+            MinneTrail-v1.7.7.aab
+            MinneTrail-v1.7.7.aab.sha256
           if-no-files-found: error

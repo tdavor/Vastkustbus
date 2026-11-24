@@ -1,0 +1,40 @@
+name: Publish verified MinneTrail Google Play 1.7.5
+on:
+  push:
+    branches: ["release/play-v1.7.5"]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Verify tested source and signed Play bundle
+        run: |
+          set -euo pipefail
+          source_sha="02fbc9aa2330424b7507d7fbdd13e763b6489b21"
+          release_sha="022a9ca256ad658d41df917aefe76f4279243a55"
+          source_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$source_sha" --jq '.tree.sha')"
+          release_tree="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$release_sha" --jq '.tree.sha')"
+          [[ "$source_tree" == "$release_tree" ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/45401274188" > run.json
+          jq -e --arg sha "$source_sha" '.conclusion == "success" and .head_sha == $sha' run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14924536935" > artifact.json
+          jq -e --arg sha "$source_sha" '.name == "signed-google-play-bundle" and .expired == false and .workflow_run.head_sha == $sha' artifact.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/14924536935/zip" > play-bundle.zip
+          echo "206b263677e5250f704d8ad095ce4be10d041b3d16a8767c5303da835609c32c  play-bundle.zip" | sha256sum --check
+          unzip -j play-bundle.zip
+          sha256sum --check MinneTrail-v1.7.5.aab.sha256
+      - name: Publish Google Play test build
+        run: |
+          set -euo pipefail
+          tag="v1.7.5"
+          release_sha="022a9ca256ad658d41df917aefe76f4279243a55"
+          if ! gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" >/dev/null 2>&1; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$tag" -f sha="$release_sha"
+          fi
+          actual="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.sha')"
+          [[ "$actual" == "$release_sha" ]]
+          gh release create "$tag" --verify-tag --prerelease --title "MinneTrail 1.7.5 – Google Play test" --notes "Google Play test build 1.7.5 (21), package se.minnetrail.app. Includes a local parent PIN for sharing, printing, external links and reset. Places are entered manually; Play builds request no location or APK-installer permissions and use Google Play updates. Existing missions, XP, rewards, albums and icon remain. The signed AAB passed native build, unit tests, manifest, offline model and signing checks. Device smoke testing remains required. This prerelease is for Google Play testing; the existing GitHub APK release remains unchanged." --repo "$GITHUB_REPOSITORY" MinneTrail-v1.7.5.aab MinneTrail-v1.7.5.aab.sha256

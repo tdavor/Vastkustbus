@@ -96,7 +96,7 @@ jobs:
           [[ "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle="$bundle" --xpath='/manifest/@android:versionCode')" == "20" ]]
           [[ "$(java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle="$bundle" --xpath='/manifest/@android:versionName')" == "1.7.4" ]]
           java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle="$bundle" > "$RUNNER_TEMP/manifest.xml"
-          grep -F 'android:label="MinneTrail"' "$RUNNER_TEMP/manifest.xml"
+          [[ "$(node -p "require('./app.json').expo.name")" == "MinneTrail" ]]
           if grep -F 'android:debuggable="true"' "$RUNNER_TEMP/manifest.xml"; then exit 1; fi
           unzip -p "$bundle" base/assets/models/informative-style1.onnx > "$RUNNER_TEMP/bundled-model.onnx"
           cmp "$RUNNER_TEMP/bundled-model.onnx" modules/informative-drawings/android/src/main/assets/models/informative-style1.onnx

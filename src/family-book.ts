@@ -1,3 +1,4 @@
+import { memoryTitle } from './memory-labels';
 import { File } from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import * as Print from 'expo-print';
@@ -5,7 +6,7 @@ import { Image } from 'react-native';
 import { createColoring } from './coloring';
 import { familyBookHTML, maxBookMemories, type BookPage } from './family-book-html';
 import { dateLabel, placeLabel } from './memory';
-import { missions, type Language } from './missions';
+import { type Language } from './missions';
 import { photoFile, type Memory } from './store';
 
 export class BookCancelled extends Error {}
@@ -45,7 +46,7 @@ export async function generateFamilyBook(options: {
     options.progress(index + 1, memories.length);
     const memory = memories[index];
     const common = {
-      title: missions.find(item => item.id === memory.missionId)?.title[language] ?? '',
+      title: memoryTitle(memory, language),
       date: dateLabel(memory, language), place: placeLabel(memory, language),
     };
     pages.push({ ...common, story: memory.story, kind: 'photo', image: await inlineBookPhoto(photoFile(memory.photo).uri, active) });

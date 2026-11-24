@@ -8,6 +8,7 @@ export type Place = { text: string } | { tag: string };
 export type Memory = {
   id: string;
   missionId: number;
+  landmarkId?: string;
   xp: number;
   date: string;
   photo: string;

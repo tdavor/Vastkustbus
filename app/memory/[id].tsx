@@ -1,3 +1,4 @@
+import { memoryTitle, memoryCity } from '../../src/memory-labels';
 import { useParentalGate } from '../../src/parent-gate';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
@@ -7,7 +8,7 @@ import { Alert, BackHandler, Text, TextInput, View } from 'react-native';
 import { maxStoryLength } from '../../src/journal';
 import { captureRef } from 'react-native-view-shot';
 import { dateLabel, MemoryPhoto, placeLabel } from '../../src/memory';
-import { avatars, levelFor, missions } from '../../src/missions';
+import { avatars, levelFor } from '../../src/missions';
 import { photoFile, useJournal } from '../../src/store';
 import { printImage } from '../../src/printing';
 import { rewardsCopy } from '../../src/rewards';
@@ -92,6 +93,7 @@ export default function MemoryDetail() {
   }
 
   const place = memory && placeLabel(memory, language);
+  const city = memory ? memoryCity(memory, language) : t.city;
   return (
     <Page>
       <Button title={t.back} icon="arrow-back" tone="quiet" disabled={busy}
@@ -106,8 +108,8 @@ export default function MemoryDetail() {
             <Ionicons name="compass" size={27} color={colors.forest} />
           </View>
           <MemoryPhoto key={memory.id} memory={memory} language={language} onLoaded={() => setReady(true)} />
-          <Text style={styles.heading}>{missions.find(item => item.id === memory.missionId)?.title[language] ?? t.mission}</Text>
-          <Text style={styles.small}>{place && place !== t.city ? `${place} · ` : ''}{t.city} · {dateLabel(memory, language)}</Text>
+          <Text style={styles.heading}>{memoryTitle(memory, language)}</Text>
+          <Text style={styles.small}>{place && place !== city ? `${place} · ` : ''}{city} · {dateLabel(memory, language)}</Text>
           {!!memory.story && <Text style={styles.body}>{memory.story}</Text>}
           <View style={styles.row}>
             <Animal avatar={profile.avatar} size={45} />

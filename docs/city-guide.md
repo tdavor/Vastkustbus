@@ -17,3 +17,11 @@ Fact references (accessed 2026-11-24; descriptions are original child-friendly p
 - https://visitsweden.com/where-to-go/middle-sweden/stockholm/the-royal-palace-stockholm/
 - https://www.visitstockholm.com/o/stortorget/
 - https://faq.vasamuseet.se/category/45/article/4508
+
+## Photos in the shared album
+
+Every landmark has a photo action. Camera and system photo picker lead to a preview and explicit save. Saved pictures are ordinary per-child album memories with a stable `landmarkId` and `missionId: 0` (no normal mission uses that ID). Their photo XP is zero: saving atomically checks in the landmark, awarding 50 XP only if it has not already been visited. More photos and retries do not award additional XP. Existing missions and memories retain their original format and XP rules.
+
+City photos use the existing album detail, stories, colouring, artwork, sharing/printing, slideshow and family-book PDF features. Titles and city names follow Swedish/English, including Stockholm postcards and exported books. Files are copied into the normal memory directory; a failed journal write removes only the new copy. Camera results are ignored after leaving or switching profiles, and a queued save rejects a changed active profile.
+
+`node scripts/check-city-photos.cjs` exercises camera/picker handlers, cancellation/denial, preview and explicit save, late results, profile isolation, file rollback, persistence and one-time XP.

@@ -1,7 +1,7 @@
+import { memoryTitle } from '../src/memory-labels';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { dateLabel, MemoryPhoto, placeLabel } from '../src/memory';
-import { missions } from '../src/missions';
 import { useJournal } from '../src/store';
 import { rewardsCopy } from '../src/rewards';
 import { copy } from '../src/text';
@@ -26,7 +26,7 @@ export default function MemoryBook() {
           <Pressable key={memory.id} style={styles.card} accessibilityRole="button"
             onPress={() => router.push({ pathname: '/memory/[id]', params: { id: memory.id } })}>
             <MemoryPhoto memory={memory} language={language} />
-            <Text style={styles.heading}>{missions.find(item => item.id === memory.missionId)?.title[language] ?? t.mission}</Text>
+            <Text style={styles.heading}>{memoryTitle(memory, language)}</Text>
             {!!memory.story && <Text numberOfLines={2} style={styles.body}>{memory.story}</Text>}
             {!!memory.coloredPhoto && <Text style={styles.small}>{t.coloredArtwork} ✓</Text>}
             <Text style={styles.small}>{dateLabel(memory, language)} · {placeLabel(memory, language) ?? t.noPlace}</Text>

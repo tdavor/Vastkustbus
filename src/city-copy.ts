@@ -5,6 +5,10 @@ import type { Language } from './missions';
 export const guideCopy = {
   sv: {
     title: 'Lär känna din stad', back: 'Tillbaka',
+    photo: 'Ta ett foto', choosePhoto: 'Välj ett foto', photoIntro: 'Fotografera er upptäckt tillsammans. Bilden sparas i samma minnesbok som era andra uppdrag.',
+    photoSaved: 'Fotot är sparat i minnesboken!', album: 'Öppna minnesboken', photoCount: (count: number) => 'Fotominnen: ' + count,
+    savedXP: (xp: number) => xp ? '+' + xp + ' XP för ert första besök!' : 'Ni har redan fått XP för den här platsen. Nu har ni ett nytt minne!',
+    photoSave: 'Spara fotot i minnesboken', photoSaving: 'Sparar fotot...', pickerError: 'Fotot kunde inte öppnas. Försök igen.',
     intro: 'Välj ett land och sedan en stad. Upptäck kända platser med små uppdrag för dig och din vuxen!',
     countryMissing: 'Landet hittades inte', cityMissing: 'Staden hittades inte',
     citiesAvailable: (count: number) => 'Städer att upptäcka: ' + count,
@@ -20,6 +24,10 @@ export const guideCopy = {
   },
   en: {
     title: 'Discover your city', back: 'Back',
+    photo: 'Take a photo', choosePhoto: 'Choose a photo', photoIntro: 'Photograph your discovery together. The picture goes into the same memory album as your other missions.',
+    photoSaved: 'Photo saved in your memory album!', album: 'Open memory album', photoCount: (count: number) => 'Photo memories: ' + count,
+    savedXP: (xp: number) => xp ? '+' + xp + ' XP for your first visit!' : 'You have already earned XP for this place. Now you have a new memory!',
+    photoSave: 'Save photo to memory album', photoSaving: 'Saving photo...', pickerError: 'Could not open the photo. Please try again.',
     intro: 'Choose a country, then a city. Discover famous places with little challenges for you and your grown-up!',
     countryMissing: 'Country not found', cityMissing: 'City not found',
     citiesAvailable: (count: number) => 'Cities to discover: ' + count,

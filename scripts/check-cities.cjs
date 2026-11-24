@@ -96,7 +96,7 @@ function renderLoad(file) {
   file = path.resolve(file);
   if (uiCache.has(file)) return uiCache.get(file);
   if (file.endsWith('/src/ui.tsx')) return { Button:'Button',Page:'Page',styles:{},colors:{} };
-  if (file.endsWith('/src/store.tsx')) return { useJournal:()=>({journal:{language,profile:{name:'Alex'},visitedLandmarks:['poseidon']},activePlayerId:'child',checkInLandmark:async()=>50}) };
+  if (file.endsWith('/src/store.tsx')) return { useJournal:()=>({journal:{language,profile:{name:'Alex'},memories:[],visitedLandmarks:['poseidon']},activePlayerId:'child',checkInLandmark:async()=>50}) };
   if (file.endsWith('/src/parent-gate.tsx')) return { useParentalGate:()=>({authorize:async()=>true}) };
   const exports = {}; uiCache.set(file,exports);
   new Function('exports','require',ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText)(exports,name=>{
@@ -135,7 +135,7 @@ for (const selected of ['en','sv','en']) {
   for(const city of cities){
     params={id:city.id};const text=visibleText(cityPage());
     assert(text.includes(localizeCity(city,language).description));
-    assert(text.includes(t.map));assert(text.includes(t.checkIn));
+    assert(text.includes(t.map));assert(text.includes(t.checkIn));assert(text.includes(t.photo));
     assert(text.includes(t.progress(city.id==='gothenburg'?1:0,4)));
     for(const place of cityLandmarks(city)){
       const translated=localizeLandmark(place,language);

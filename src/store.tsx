@@ -229,7 +229,11 @@ function useJournalState() {
     }),
     saveCityPhoto: (playerId: string, landmarkId: string, uri: string, draft: CityPhotoDraft) => persistCityPhoto({
       playerId, landmarkId, draft, update,
-      copyPhoto: () => savePhoto(uri, draft.photo),
+      copyPhoto: () => {
+        // A collision must never let rollback delete an older album photo.
+        if (photoFile(draft.photo).exists) throw new Error('Photo file already exists');
+        savePhoto(uri, draft.photo);
+      },
       removePhoto: () => { const file = photoFile(draft.photo); if (file.exists) file.delete(); },
     }),
     checkInLandmark: async (landmarkId: string) => {
